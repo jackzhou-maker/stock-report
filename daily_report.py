@@ -2,16 +2,16 @@
 """
 股票快报 - 每日三市报告
 US 🇺🇸 / HK 🇭🇰 / A股 🇨🇳
-数据: Finnhub (美股) + yfinance (港股/A股)
+数据: Finnhub (美股) + yfinance (港股/A股) + Alpha Vantage (新闻情绪)
 """
 
 import os
 import requests
+import yfinance as yf
 import warnings
 from datetime import datetime
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 warnings.filterwarnings("ignore")
 
@@ -48,7 +48,6 @@ CN_STOCKS = {
     "600887.SS": "伊利股份", "601111.SS": "中国国航", "688981.SS": "中芯国际",
 }
 
-
 # ── Finnhub helpers ───────────────────────────────
 _S = requests.Session()
 _S.headers.update({"User-Agent": "Mozilla/5.0"})
@@ -61,7 +60,6 @@ def fh(path, symbol, params=None, timeout=8):
         return _S.get(url, timeout=timeout).json()
     except:
         return None
-
 
 # ── Alpha Vantage helpers ─────────────────────────────
 def av_news(tickers=None, limit=20, timeout=8):
@@ -87,7 +85,176 @@ def av_news(tickers=None, limit=20, timeout=8):
     except:
         return []
 
+# ── News section HTML ─────────────────────────────
+SENTIMENT_COLOR = {
+    "Bullish": "#22c55e", "Somewhat_Bullish": "#84cc16",
+    "Neutral": "#64748b", "Somewhat_Bearish": "#f97316", "Bearish": "#ef4444"
+}
 
+def make_news_section(news):
+    if not news:
+        return ""
+    items_html = ""
+    for item in news[:15]:
+        sc = SENTIMENT_COLOR.get(item.get("sentiment", "Neutral"), "#64748b")
+        tickers_html = "".join([
+            f"<span class='tck'>{t[0]}</span>" for t in item.get("tickers", [])[:5]
+        ])
+        topics_html = "".join([
+            f"<span class='topic'>{t}</span>" for t in item.get("topics", [])[:3]
+        ])
+        items_html += f"""
+<div class='ni'>
+  <div class='nhead'>
+    <a href='{item["url"]}' target='_blank' class='ntitle'>{item["title"]}</a>
+    <span class='sent' style='color:{sc}'>{item.get('sentiment','Neutral')}</span>
+  </div>
+  <div class='nmeta'>
+    <span class='nsrc'>{item.get('source','')}</span> ·
+    <span class='ntime'>{item.get('time','')}</span>
+    {topics_html}
+  </div>
+  <div class='nsummary'>{item.get('summary','')}</div>
+  <div class='ntick'>{tickers_html}</div>
+</div>"""
+    return f"""
+<div class='sec'>
+<h2 class='sec-title' style='border-left:4px solid #8b5cf6'>📰 市场新闻 & 情绪</h2>
+<div class='nlist'>{items_html}
+</div>
+</div>"""
+
+# ── Stock section HTML ────────────────────────────
+def make_section(results, market_label, flag, color):
+    if not results:
+        return f"<div class='sec'><h2 class='sec-title'>{flag} {market_label}</h2><p style='color:#64748b;font-size:12px'>暂无数据</p></div>"
+    order = {"强烈买入":0,"可以考虑":1,"观望":2,"不推荐":3}
+    sorted_r = sorted(results, key=lambda x: (order.get(x["signal"],4), -x["ts"]))
+    buy_count = sum(1 for r in results if r["signal"]=="强烈买入")
+    consider_count = sum(1 for r in results if r["signal"]=="可以考虑")
+    cards = ""
+    for r in sorted_r:
+        if r["signal"] in ["强烈买入","可以考虑"]:
+            cur = "$" if r["market"] == "US" else "¥"
+            price_str = f"{cur}{r['price']:.2f}" if r['price'] else "--"
+            cards += f"""<div class="bc">
+<div class="bln"><span class="bsym" style="color:{r['sc']}">{r['sym']}</span><span class="bname">{r['name']}</span></div>
+<div class="bpri">{price_str}</div>
+<div class="bmeta"><span style="color:{r['analyst_color']};font-weight:600">{r['analyst_label']}</span> · PE {r['pe_str']} · {r['pos_str']}低位 · β{r['beta_str']}</div>
+<div class="brig"><span class="sig-pill" style="background:{r['sbg']};color:{r['sc']}">{r['signal']}</span><span class="sc-num">评分{r['ts']}</span></div>
+</div>"""
+    rows = ""
+    for r in sorted_r:
+        cur = "$" if r["market"] == "US" else "¥"
+        price_cell = f"{cur}{r['price']:.2f}" if r['price'] else "N/A"
+        rows += f"""<tr>
+<td class="sym-cell"><div class="ln"><div><span class="ticker">{r['sym']}</span><span class="cname">{r['name']}</span></div></div></td>
+<td class="price">{price_cell}</td>
+<td style="color:{r['chg_color']};font-weight:600">{r['dp_str']}</td>
+<td>{r['pe_str']}</td>
+<td>{r['pos_str']}</td>
+<td>{r['wl52'] or 'N/A'}</td>
+<td>{r['wh52'] or 'N/A'}</td>
+<td class="score">{r['ts']}</td>
+<td class="sig" style="background:{r['sbg']};color:{r['sc']}">{r['signal']}</td>
+<td style="color:{r['analyst_color']};font-weight:600">{r['analyst_label']}</td>
+<td style="color:{r['tgt_color']}">{r['tgt_str']}</td>
+<td>{r['rev_str']}</td>
+<td>{r['ni_str']}</td>
+<td>{r['eps_str']}</td>
+<td>{r['cr_str']}</td>
+</tr>"""
+    summary = f"""<div class="sum-row">
+<span class="sr g">强烈买入 {buy_count}</span>
+<span class="sr o">可以考虑 {consider_count}</span>
+<span class="sr r">其他 {len(results)-buy_count-consider_count}</span>
+</div>"""
+    return f"""<div class="sec">
+<h2 class="sec-title" style="border-left:4px solid {color}">{flag} {market_label}</h2>
+{summary}
+<div class="bc-list">{cards}</div>
+<table>
+<thead><tr><th>代码</th><th>价格</th><th>涨跌</th><th>PE</th><th>年低位</th><th>52W Low</th><th>52W High</th><th>评分</th><th>信号</th><th>分析师</th><th>目标价</th><th>营收</th><th>净利润</th><th>EPS</th><th>流比</th></tr></thead>
+<tbody>{rows}</tbody>
+</table>
+</div>"""
+
+# ── Full HTML ────────────────────────────────────
+def make_html(us_data, hk_data, cn_data, news_data, now):
+    us_sec = make_section(us_data, "美股", "🇺🇸", "#3b82f6")
+    hk_sec = make_section(hk_data, "港股", "🇭🇰", "#ef4444")
+    cn_sec = make_section(cn_data, "A股", "🇨🇳", "#f59e0b")
+    news_sec = make_news_section(news_data)
+    return f"""<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>股票快报</title>
+<style>
+*{{margin:0;padding:0;box-sizing:border-box}}
+body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px}}
+.c{{max-width:1700px;margin:0 auto}}
+.hdr{{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #1e293b}}
+.hdr h1{{font-size:24px;font-weight:800;color:#f8fafc}}
+.hdr .sub{{font-size:11px;color:#64748b;margin-top:2px}}
+.hdr .time{{font-size:11px;color:#64748b;text-align:right}}
+.sec{{margin-bottom:28px;padding:16px;background:#1e293b;border-radius:12px}}
+.sec-title{{font-size:15px;font-weight:700;color:#f8fafc;margin-bottom:10px;padding-bottom:8px}}
+.sum-row{{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}}
+.sr{{background:#0f172a;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}}
+.sr.g{{color:#22c55e}}.sr.o{{color:#f59e0b}}.sr.r{{color:#64748b}}
+.bc-list{{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;padding:6px;background:#0f172a;border-radius:8px}}
+.bc{{display:flex;align-items:center;gap:10px;padding:6px 8px;border-bottom:1px solid #1e293b;font-size:11px}}
+.bc:last-child{{border-bottom:none}}
+.bln{{min-width:120px}}
+.bsym{{font-weight:700;font-size:12px;display:block}}
+.bname{{font-size:9px;color:#94a3b8}}
+.bpri{{font-weight:700;min-width:60px;text-align:center}}
+.bmeta{{flex:1;font-size:10px;color:#94a3b8}}
+.brig{{text-align:right;min-width:100px;display:flex;flex-direction:column;align-items:flex-end}}
+.sig-pill{{font-weight:600;border-radius:4px;padding:1px 6px;font-size:10px}}
+.sc-num{{font-size:9px;color:#64748b;margin-top:1px}}
+table{{width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;font-size:11px;margin-top:4px}}
+th{{text-align:left;padding:7px 9px;font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #334155;white-space:nowrap}}
+td{{padding:7px 9px;border-bottom:1px solid #1e293b;white-space:nowrap}}
+tr:last-child td{{border-bottom:none}}
+tr:hover{{background:#263348}}
+.ticker{{font-weight:700;font-size:12px}}
+.cname{{font-size:9px;color:#94a3b8;display:block}}
+.price{{font-weight:700}}
+.score{{font-weight:700;text-align:center}}
+.sig{{font-weight:600;text-align:center;border-radius:4px;padding:1px 5px;font-size:10px}}
+.foot{{margin-top:20px;text-align:center;font-size:10px;color:#475569;padding:10px 0;border-top:1px solid #1e293b}}
+.nlist{{display:flex;flex-direction:column;gap:8px}}
+.ni{{background:#0f172a;border-radius:8px;padding:10px 12px}}
+.nhead{{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}}
+.ntitle{{color:#e2e8f0;font-size:12px;font-weight:600;text-decoration:none;line-height:1.3}}
+.ntitle:hover{{color:#60a5fa}}
+.sent{{font-size:10px;font-weight:600;white-space:nowrap}}
+.nmeta{{font-size:9px;color:#64748b;margin-bottom:5px}}
+.topic{{background:#1e293b;padding:1px 5px;border-radius:4px;margin-right:4px;color:#94a3b8}}
+.nsummary{{font-size:10px;color:#94a3b8;line-height:1.4;margin-bottom:5px}}
+.ntick{{display:flex;gap:4px;flex-wrap:wrap}}
+.tck{{background:#1e3a5f;color:#60a5fa;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600}}
+</style>
+</head>
+<body>
+<div class="c">
+  <div class="hdr">
+    <div><h1>📈 股票快报</h1><div class="sub">每日三市 · 美股🇺🇸 · 港股🇭🇰 · A股🇨🇳</div></div>
+    <div class="time">{now} CST<br><span style="font-size:10px">数据: Finnhub · Yahoo Finance · Alpha Vantage新闻情绪</span></div>
+  </div>
+  {news_sec}
+  {us_sec}
+  {hk_sec}
+  {cn_sec}
+  <div class="foot">股票快报 · Finnhub · Yahoo Finance · Alpha Vantage新闻情绪 · 不作为投资建议</div>
+</div>
+</body>
+</html>"""
+
+# ── Main ─────────────────────────────────────────
 def fetch_us(sym):
     q = fh("/quote", sym) or {}
     rec = fh("/stock/recommendation", sym) or []
@@ -153,7 +320,6 @@ def fetch_us(sym):
         "pos_str": f"{pos:.0f}%",
     }
 
-
 def fetch_cn(sym, name):
     """A股/港股 - yfinance"""
     try:
@@ -217,133 +383,17 @@ def fetch_cn(sym, name):
     except:
         return None
 
-
-def make_section(results, market_label, flag, color):
-    if not results:
-        return f"<div class='sec'><h2 class='sec-title'>{flag} {market_label}</h2><p style='color:#64748b;font-size:12px'>暂无数据</p></div>"
-    order = {"强烈买入":0,"可以考虑":1,"观望":2,"不推荐":3}
-    sorted_r = sorted(results, key=lambda x: (order.get(x["signal"],4), -x["ts"]))
-    buy_count = sum(1 for r in results if r["signal"]=="强烈买入")
-    consider_count = sum(1 for r in results if r["signal"]=="可以考虑")
-    # cards
-    cards = ""
-    for r in sorted_r:
-        if r["signal"] in ["强烈买入","可以考虑"]:
-            cur = "$" if r["market"] == "US" else "¥"
-            price_str = f"{cur}{r['price']:.2f}" if r['price'] else "--"
-            cards += f"""<div class="bc">
-<div class="bln"><span class="bsym" style="color:{r['sc']}">{r['sym']}</span><span class="bname">{r['name']}</span></div>
-<div class="bpri">{price_str}</div>
-<div class="bmeta"><span style="color:{r['analyst_color']};font-weight:600">{r['analyst_label']}</span> · PE {r['pe_str']} · {r['pos_str']}低位 · β{r['beta_str']}</div>
-<div class="brig"><span class="sig-pill" style="background:{r['sbg']};color:{r['sc']}">{r['signal']}</span><span class="sc-num">评分{r['ts']}</span></div>
-</div>"""
-    # table
-    rows = ""
-    for r in sorted_r:
-        cur = "$" if r["market"] == "US" else "¥"
-        price_cell = f"{cur}{r['price']:.2f}" if r['price'] else "N/A"
-        rows += f"""<tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">{r['sym']}</span><span class="cname">{r['name']}</span></div></div></td>
-<td class="price">{price_cell}</td>
-<td style="color:{r['chg_color']};font-weight:600">{r['dp_str']}</td>
-<td>{r['pe_str']}</td>
-<td>{r['pos_str']}</td>
-<td>{r['wl52'] or 'N/A'}</td>
-<td>{r['wh52'] or 'N/A'}</td>
-<td class="score">{r['ts']}</td>
-<td class="sig" style="background:{r['sbg']};color:{r['sc']}">{r['signal']}</td>
-<td style="color:{r['analyst_color']};font-weight:600">{r['analyst_label']}</td>
-<td style="color:{r['tgt_color']}">{r['tgt_str']}</td>
-<td>{r['rev_str']}</td>
-<td>{r['ni_str']}</td>
-<td>{r['eps_str']}</td>
-<td>{r['cr_str']}</td>
-</tr>"""
-    summary = f"""<div class="sum-row">
-<span class="sr g">强烈买入 {buy_count}</span>
-<span class="sr o">可以考虑 {consider_count}</span>
-<span class="sr r">其他 {len(results)-buy_count-consider_count}</span>
-</div>"""
-    return f"""<div class="sec">
-<h2 class="sec-title" style="border-left:4px solid {color}">{flag} {market_label}</h2>
-{summary}
-<div class="bc-list">{cards}</div>
-<table>
-<thead><tr><th>代码</th><th>价格</th><th>涨跌</th><th>PE</th><th>年低位</th><th>52W Low</th><th>52W High</th><th>评分</th><th>信号</th><th>分析师</th><th>目标价</th><th>营收</th><th>净利润</th><th>EPS</th><th>流比</th></tr></thead>
-<tbody>{rows}</tbody>
-</table>
-</div>"""
-
-
-def make_html(us_data, hk_data, cn_data, now):
-    us_sec = make_section(us_data, "美股", "🇺🇸", "#3b82f6")
-    hk_sec = make_section(hk_data, "港股", "🇭🇰", "#ef4444")
-    cn_sec = make_section(cn_data, "A股", "🇨🇳", "#f59e0b")
-    return f"""<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>股票快报</title>
-<style>
-*{{margin:0;padding:0;box-sizing:border-box}}
-body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px}}
-.c{{max-width:1700px;margin:0 auto}}
-.hdr{{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #1e293b}}
-.hdr h1{{font-size:24px;font-weight:800;color:#f8fafc}}
-.hdr .sub{{font-size:11px;color:#64748b;margin-top:2px}}
-.hdr .time{{font-size:11px;color:#64748b;text-align:right}}
-.sec{{margin-bottom:28px;padding:16px;background:#1e293b;border-radius:12px}}
-.sec-title{{font-size:15px;font-weight:700;color:#f8fafc;margin-bottom:10px;padding-bottom:8px}}
-.sum-row{{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}}
-.sr{{background:#0f172a;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}}
-.sr.g{{color:#22c55e}}.sr.o{{color:#f59e0b}}.sr.r{{color:#64748b}}
-.bc-list{{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;padding:6px;background:#0f172a;border-radius:8px}}
-.bc{{display:flex;align-items:center;gap:10px;padding:6px 8px;border-bottom:1px solid #1e293b;font-size:11px}}
-.bc:last-child{{border-bottom:none}}
-.bln{{min-width:120px}}
-.bsym{{font-weight:700;font-size:12px;display:block}}
-.bname{{font-size:9px;color:#94a3b8}}
-.bpri{{font-weight:700;min-width:60px;text-align:center}}
-.bmeta{{flex:1;font-size:10px;color:#94a3b8}}
-.brig{{text-align:right;min-width:100px;display:flex;flex-direction:column;align-items:flex-end}}
-.sig-pill{{font-weight:600;border-radius:4px;padding:1px 6px;font-size:10px}}
-.sc-num{{font-size:9px;color:#64748b;margin-top:1px}}
-table{{width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;font-size:11px;margin-top:4px}}
-th{{text-align:left;padding:7px 9px;font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #334155;white-space:nowrap}}
-td{{padding:7px 9px;border-bottom:1px solid #1e293b;white-space:nowrap}}
-tr:last-child td{{border-bottom:none}}
-tr:hover{{background:#263348}}
-.sym-cell{{}}
-.ticker{{font-weight:700;font-size:12px}}
-.cname{{font-size:9px;color:#94a3b8;display:block}}
-.price{{font-weight:700}}
-.score{{font-weight:700;text-align:center}}
-.sig{{font-weight:600;text-align:center;border-radius:4px;padding:1px 5px;font-size:10px}}
-.foot{{margin-top:20px;text-align:center;font-size:10px;color:#475569;padding:10px 0;border-top:1px solid #1e293b}}
-</style>
-</head>
-<body>
-<div class="c">
-  <div class="hdr">
-    <div><h1>📈 股票快报</h1><div class="sub">每日三市 · 美股🇺🇸 · 港股🇭🇰 · A股🇨🇳</div></div>
-    <div class="time">{now} CST<br><span style="font-size:10px">数据来源: Finnhub (美股) · Yahoo Finance (港/A股)</span></div>
-  </div>
-  {us_sec}
-  {hk_sec}
-  {cn_sec}
-  <div class="foot">股票快报 · 评分逻辑: PE合理度(30%) + 历史低位(40%) + 分析师推荐(30%) · 不作为投资建议</div>
-</div>
-</body>
-</html>"""
-
-
 def main():
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     print(f"📈 股票快报 {now}")
     print("=" * 50)
 
-    # 美股 (并发)
+    # Alpha Vantage 新闻
+    print("📰 新闻...")
+    news_data = av_news(tickers=list(US_STOCKS.keys()), limit=30)
+    print(f"  → 获取 {len(news_data)} 条新闻")
+
+    # 美股
     print("🇺🇸 美股...")
     us_results = []
     with ThreadPoolExecutor(max_workers=8) as ex:
@@ -355,7 +405,7 @@ def main():
                 print(f"  {r['sym']}: ${r['price']:.2f} → {r['signal']}")
     print(f"  → {len(us_results)}/{len(US_STOCKS)} 只")
 
-    # 港股 (yfinance)
+    # 港股
     print("🇭🇰 港股...")
     hk_results = []
     for sym, name in HK_STOCKS.items():
@@ -377,50 +427,12 @@ def main():
             print(f"  {sym}: ¥{p} → {r['signal']}")
     print(f"  → {len(cn_results)}/{len(CN_STOCKS)} 只")
 
-    html = make_html(us_results, hk_results, cn_results, now)
+    html = make_html(us_results, hk_results, cn_results, news_data, now)
     out = "/Users/jack/.openclaw/workspace/stock_report.html"
     Path(out).write_text(html)
     total = len(us_results) + len(hk_results) + len(cn_results)
-    print(f"\n✅ 完成: {total} 只股票 → {out} ({len(html)} bytes)")
+    print(f"\n✅ 完成: {total} 只股票 + {len(news_data)} 条新闻 → {out} ({len(html)} bytes)")
     return out
-
 
 if __name__ == "__main__":
     main()
-
-def push_to_github():
-    """自动推送到 GitHub Pages"""
-    import subprocess
-    token = "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"
-    repo = "jackzhou-maker/stock-report"
-    try:
-        # 确认 git remote
-        result = subprocess.run(
-            ["git", "remote", "get-url", "origin"],
-            capture_output=True, text=True, cwd="/Users/jack/.openclaw/workspace"
-        )
-        current_url = result.stdout.strip()
-        expected_url = f"https://jackzhou-maker:{token}@github.com/{repo}.git"
-        if expected_url not in current_url and token not in current_url:
-            # 更新 remote URL
-            subprocess.run(
-                ["git", "remote", "set-url", "origin", expected_url],
-                cwd="/Users/jack/.openclaw/workspace", check=True
-            )
-        # 添加文件
-        subprocess.run(["git", "add", "stock_report.html"], cwd="/Users/jack/.openclaw/workspace", capture_output=True)
-        # 检查变更
-        status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd="/Users/jack/.openclaw/workspace")
-        if status.stdout.strip():
-            subprocess.run(["git", "config", "user.email", "jack@openclaw.ai"], cwd="/Users/jack/.openclaw/workspace")
-            subprocess.run(["git", "config", "user.name", "Jack Zhou"], cwd="/Users/jack/.openclaw/workspace")
-            subprocess.run(["git", "commit", "-m", "📈 Stock Report $(date '+%Y-%m-%d %H:%M')"], cwd="/Users/jack/.openclaw/workspace")
-            subprocess.run(["git", "push", "-u", "origin", "main"], cwd="/Users/jack/.openclaw/workspace")
-            print("✅ GitHub Pages 已更新")
-        else:
-            print("📝 无变更，跳过推送")
-    except Exception as e:
-        print(f"⚠️ GitHub 推送失败: {e}")
-
-if __name__ == "__main__":
-    push_to_github()
