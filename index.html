@@ -1,225 +1,259 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Jack's Market Hub</title>
+<title>Jack's Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080810;color:#e0e0e0;min-height:100vh}
-a{color:inherit;text-decoration:none}
-
-.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:24px 32px;border-bottom:1px solid #1f2937;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.header h1{font-size:24px;color:#fff}
-.header h1 span{color:#4caf50}
-.header .date{font-size:13px;color:#888}
-.header .nav{display:flex;gap:10px;flex-wrap:wrap}
-.header .nav a{background:#1f2937;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;transition:background .2s}
-.header .nav a:hover{background:#374151}
-
-.main{max-width:1200px;margin:0 auto;padding:24px 20px}
-
-.section{background:#111827;border-radius:16px;padding:20px;margin-bottom:20px;border:1px solid #1f2937}
-.section-title{font-size:16px;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.section-title span{font-size:20px}
-
-刷新时间: 00:11:07 &nbsp;|&nbsp;
-<a href="stock_forecast_chart.html" target="_blank" style="color:#60a5fa;text-decoration:underline">📊 预报图表</a> &nbsp;|&nbsp;
-<a href="stock_signal_model.py" style="color:#60a5fa;text-decoration:underline">📋 信号数据</a> &nbsp;|&nbsp;
-<a href="stock_forecast.py" style="color:#60a5fa;text-decoration:underline">📈 预报脚本</a>
-
-table{width:100%;border-collapse:collapse;margin-top:12px}
-th{text-align:left;font-size:11px;color:#666;text-transform:uppercase;padding:8px 10px;background:#0d1117;border-bottom:1px solid #1f2937}
-td{padding:10px 10px;font-size:13px;border-bottom:1px solid #1a1f2e}
-tr:hover{background:#1a2030;cursor:pointer}
-.up{color:#4caf50;font-weight:600}
-.down{color:#f44336}
-.s-badge{margin-right:6px;font-size:14px}
-
-.btc-banner{background:linear-gradient(135deg,#1a2a1a,#0d1f0d);border:1px solid #1b5e20;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-.btc-price{font-size:28px;font-weight:700;color:#4caf50}
-.btc-info{font-size:12px;color:#888;line-height:1.8}
-.btc-badge{background:#1b5e20;color:#4caf50;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
-
-.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:12px}
-.info-card{background:#0d1117;border-radius:12px;padding:16px;border:1px solid #1f2937}
-.info-card h3{font-size:13px;color:#888;margin-bottom:8px;text-transform:uppercase}
-.info-card .val{font-size:22px;font-weight:700;color:#fff}
-
-.tips{background:#1a1a2e;border-radius:12px;padding:16px;margin-top:12px;font-size:12px;color:#888;line-height:1.8}
-
-.footer{text-align:center;color:#333;font-size:11px;padding:20px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0}
+.tabs{display:flex;background:#1e293b;border-bottom:2px solid #334155;position:sticky;top:0;z-index:100}
+.tab-btn{flex:1;padding:14px 8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;border:none;background:none;transition:all .2s;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab-btn:hover{color:#e2e8f0}
+.tab-btn.active{color:#f8fafc;border-bottom-color:#3b82f6}
+.tab-content{display:none;padding:16px;max-width:1700px;margin:0 auto}
+.tab-content.active{display:block}
+/* ── STOCK REPORT ── */
+.c{max-width:1700px;margin:0 auto}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #1e293b}
+.hdr h1{font-size:24px;font-weight:800;color:#f8fafc}
+.hdr .sub{font-size:11px;color:#64748b;margin-top:2px}
+.hdr .time{font-size:11px;color:#64748b;text-align:right}
+.sec{margin-bottom:28px;padding:16px;background:#1e293b;border-radius:12px}
+.sec-title{font-size:15px;font-weight:700;color:#f8fafc;margin-bottom:10px;padding-bottom:8px}
+.sum-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.sr{background:#0f172a;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.sr.g{color:#22c55e}.sr.o{color:#f59e0b}.sr.r{color:#64748b}
+.bc-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;padding:6px;background:#0f172a;border-radius:8px}
+.bc{display:flex;align-items:center;gap:10px;padding:6px 8px;border-bottom:1px solid #1e293b;font-size:11px}
+.bc:last-child{border-bottom:none}
+.bln{min-width:120px}
+.bsym{font-weight:700;font-size:12px;display:block}
+.bname{font-size:9px;color:#94a3b8}
+.bpri{font-weight:700;min-width:60px;text-align:center}
+.bmeta{flex:1;font-size:10px;color:#94a3b8}
+.brig{text-align:right;min-width:100px;display:flex;flex-direction:column;align-items:flex-end}
+.sig-pill{font-weight:600;border-radius:4px;padding:1px 6px;font-size:10px}
+.sc-num{font-size:9px;color:#64748b;margin-top:1px}
+table{width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;font-size:11px;margin-top:4px}
+th{text-align:left;padding:7px 9px;font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #334155;white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid #1e293b;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover{background:#263348}
+.ticker{font-weight:700;font-size:12px}
+.cname{font-size:9px;color:#94a3b8;display:block}
+.price{font-weight:700}
+.score{font-weight:700;text-align:center}
+.sig{font-weight:600;text-align:center;border-radius:4px;padding:1px 5px;font-size:10px}
+.foot{margin-top:20px;text-align:center;font-size:10px;color:#475569;padding:10px 0;border-top:1px solid #1e293b}
+.nlist{display:flex;flex-direction:column;gap:8px}
+.ni{background:#0f172a;border-radius:8px;padding:10px 12px}
+.nhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
+.ntitle{color:#e2e8f0;font-size:12px;font-weight:600;text-decoration:none;line-height:1.3}
+.ntitle:hover{color:#60a5fa}
+.sent{font-size:10px;font-weight:600;white-space:nowrap}
+.nmeta{font-size:9px;color:#64748b;margin-bottom:5px}
+.topic{background:#1e293b;padding:1px 5px;border-radius:4px;margin-right:4px;color:#94a3b8}
+.nsummary{font-size:10px;color:#94a3b8;line-height:1.4;margin-bottom:5px}
+.ntick{display:flex;gap:4px;flex-wrap:wrap}
+.tck{background:#1e3a5f;color:#60a5fa;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600}
+/* ── BTC ── */
+.btc-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh;padding:20px}
+.price-banner{background:linear-gradient(135deg,#1a1500,#1a0f00);border:1px solid #f7931a;border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px}
+.btc-icon{font-size:40px}
+.price-main{font-size:36px;font-weight:700;color:#f7931a}
+.price-chg{font-size:14px;color:#4caf50;margin-top:2px}
+.price-meta{font-size:12px;color:#888;margin-top:4px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.card{background:#111827;border-radius:14px;padding:16px;border:1px solid #1f2937}
+.card-label{font-size:10px;color:#666;text-transform:uppercase;margin-bottom:6px}
+.card-val{font-size:22px;font-weight:700;color:#fff}
+.card-sub{font-size:11px;color:#888;margin-top:2px}
+.signals{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.signal-box{background:#111827;border-radius:14px;padding:18px;border:1px solid #1f2937}
+.signal-title{font-size:12px;color:#888;margin-bottom:8px;text-transform:uppercase}
+.signal-val{font-size:16px;font-weight:700;margin-bottom:4px}
+.signal-action{font-size:12px;color:#888}
+.trade-banner{background:#111827;border-radius:14px;padding:20px;border:2px solid #9e9e9e;margin-bottom:20px}
+.trade-title{font-size:12px;color:#888;margin-bottom:8px;text-transform:uppercase}
+.trade-action{font-size:18px;font-weight:700;color:#9e9e9e;margin-bottom:6px}
+.trade-desc{font-size:13px;color:#aaa}
+.chart-section{background:#111827;border-radius:14px;padding:20px;border:1px solid #1f2937;margin-bottom:20px}
+.section-title{font-size:14px;color:#fff;margin-bottom:14px;font-weight:600}
+.chart-wrap{height:300px}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:14px}
+.level-item{background:#0d1117;border-radius:8px;padding:12px;text-align:center}
+.level-label{font-size:10px;color:#666;margin-bottom:4px}
+.level-val{font-size:16px;font-weight:700;color:#fff}
+.level-note{font-size:10px;color:#888;margin-top:2px}
+/* ── FORECAST ── */
+.fcast-header{text-align:center;margin-bottom:24px}
+.fcast-header h1{font-size:22px;color:#fff;margin-bottom:4px}
+.fcast-header p{font-size:12px;color:#888}
+.summary-bar{display:flex;gap:16px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+.s-card{background:#1a1a2e;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px}
+.s-card .sc{font-size:20px;font-weight:700;color:#4caf50}
+.s-card .sl{font-size:10px;color:#888;margin-top:2px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:20px}
+.fcard{background:#13132a;border-radius:12px;padding:14px;border:1px solid #222}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.stock-name{font-size:16px;font-weight:700;color:#fff;min-width:50px}
+.stock-price{font-size:16px;color:#fff}
+.stock-chg{font-size:12px}
+.signal-badge{margin-left:auto;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.card-metrics{display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.metric{display:flex;flex-direction:column}
+.m-label{font-size:9px;color:#666;text-transform:uppercase}
+.m-val{font-size:14px;font-weight:600}
+.fcast-chart-wrap{height:120px;margin:8px 0}
+.price-bands{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.band{background:#1a1a2e;border-radius:6px;padding:6px 8px}
+.b-label{font-size:9px;color:#666;display:block}
+.b-val{font-size:12px;font-weight:600}
+.trend-info{font-size:10px;color:#888;margin-top:6px;text-align:right}
+.bar-section{margin-top:32px;background:#13132a;border-radius:12px;padding:20px}
+.fcast-section-title{font-size:16px;color:#fff;margin-bottom:16px}
+.bar-wrap{height:280px}
+.fcast-footer{text-align:center;color:#444;font-size:11px;margin-top:40px;padding:10px}
+.loading{text-align:center;color:#64748b;padding:40px;font-size:14px}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <h1>📊 <span>Jack's</span> Market Hub</h1>
-    <div class="date">2026-04-18 GMT+8 | 数据来源: Yahoo Finance</div>
-  </div>
-  <div class="nav">
-    <a href="stock_forecast_chart.html" target="_blank">📊 预报图表</a>
-    <a href="stock_signal_model.py" target="_blank">📋 信号模型</a>
-    <a href="okx_live_trader.py" target="_blank">₿ BTC交易</a>
-  </div>
+<!-- Tab Navigation -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="report">📈 股票快报</button>
+  <button class="tab-btn" data-tab="btc">₿ BTC交易</button>
+  <button class="tab-btn" data-tab="forecast">📊 次日预报</button>
 </div>
 
-<div class="main">
+<!-- TAB 1: Stock Report -->
+<div id="tab-report" class="tab-content active"><div class="loading">加载中...</div></div>
 
-<!-- BTC状态 -->
-<div class="btc-banner">
-  <div>
-    <div class="btc-price" id="btc-price">Loading...</div>
-    <div class="btc-info" id="btc-info">BTC/USDT 行情加载中</div>
-  </div>
-  <div class="btc-badge" id="btc-signal">信号: --</div>
-</div>
+<!-- TAB 2: BTC -->
+<div id="tab-btc" class="tab-content"><div class="loading">加载中...</div></div>
 
-<!-- 次日预报 -->
-<div class="section">
-  <div class="section-title">📈 <span>↑</span> 次日价格预报 Top5 <span style="font-size:12px;color:#666;font-weight:400;margin-left:8px">| 点击行查看完整图表</span></div>
-  <table>
-    <tr><th>股票</th><th>现价</th><th>明日期望</th><th>68%区间</th><th>上涨概率</th><th>RSI</th><th>年化波幅</th></tr>
-    
-        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
-          <td><span class="s-badge">🟢</span>AAPL</td>
-          <td>$271.18</td>
-          <td>$271.62</td>
-          <td>$267~$276</td>
-          <td class="up">54%</td>
-          <td style="color:#ff9800">74</td>
-          <td>26%</td>
-        </tr>
-        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
-          <td><span class="s-badge">🟢</span>JD</td>
-          <td>$31.80</td>
-          <td>$31.85</td>
-          <td>$31~$32</td>
-          <td class="up">53%</td>
-          <td style="color:#ff9800">81</td>
-          <td>34%</td>
-        </tr>
-        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
-          <td><span class="s-badge">🟢</span>AMZN</td>
-          <td>$253.92</td>
-          <td>$254.32</td>
-          <td>$249~$259</td>
-          <td class="up">53%</td>
-          <td style="color:#f44336">98</td>
-          <td>34%</td>
-        </tr>
-        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
-          <td><span class="s-badge">🟢</span>NVDA</td>
-          <td>$200.95</td>
-          <td>$201.29</td>
-          <td>$196~$206</td>
-          <td class="up">53%</td>
-          <td style="color:#f44336">93</td>
-          <td>37%</td>
-        </tr>
-        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
-          <td><span class="s-badge">🟡</span>META</td>
-          <td>$685.19</td>
-          <td>$686.10</td>
-          <td>$666~$704</td>
-          <td class="up">52%</td>
-          <td style="color:#f44336">96</td>
-          <td>44%</td>
-        </tr>
-  </table>
-  <div class="tips">
-    💡 <b>如何使用:</b> 点击任意行可打开完整K线图表 | 68%区间表示明收盘价有68%概率落在该区间 | 上涨概率基于30日波动率统计
-  </div>
-</div>
-
-<!-- 股票信号 -->
-<div class="section">
-  <div class="section-title">🛎️ <span>★</span> 股票信号 Top5 <span style="font-size:12px;color:#666;font-weight:400;margin-left:8px">| 技术面(40%) + 机构面(40%) + RSI修正</span></div>
-  <table>
-    <tr><th>信号</th><th>现价</th><th>上涨空间</th><th>置信度</th><th>RSI</th><th>评级</th></tr>
-    
-        <tr>
-          <td>🟢强烈买入 PDD</td>
-          <td>$104.85</td>
-          <td>+37%</td>
-          <td>77%</td>
-          <td>62</td>
-          <td>buy</td>
-        </tr>
-        <tr>
-          <td>🟡买入 NVDA</td>
-          <td>$200.91</td>
-          <td>+34%</td>
-          <td>59%</td>
-          <td>93</td>
-          <td>strong_buy</td>
-        </tr>
-        <tr>
-          <td>🟡买入 META</td>
-          <td>$685.08</td>
-          <td>+25%</td>
-          <td>59%</td>
-          <td>96</td>
-          <td>strong_buy</td>
-        </tr>
-        <tr>
-          <td>🟡买入 MSFT</td>
-          <td>$428.46</td>
-          <td>+35%</td>
-          <td>57%</td>
-          <td>93</td>
-          <td>strong_buy</td>
-        </tr>
-        <tr>
-          <td>🟡买入 GOOGL</td>
-          <td>$338.61</td>
-          <td>+11%</td>
-          <td>57%</td>
-          <td>93</td>
-          <td>strong_buy</td>
-        </tr>
-  </table>
-</div>
-
-<!-- 快捷入口 -->
-<div class="grid-2">
-  <div class="info-card">
-    <h3>预报覆盖</h3>
-    <div class="val">14 只</div>
-    <div style="font-size:11px;color:#666;margin-top:4px">次日内价格区间 + 涨跌概率</div>
-  </div>
-  <div class="info-card">
-    <h3>信号覆盖</h3>
-    <div class="val">14 只</div>
-    <div style="font-size:11px;color:#666;margin-top:4px">技术面 + 机构面 综合评分</div>
-  </div>
-</div>
-
-<div class="tips">
-  📌 <b>更新方式:</b><br>
-  预报图表: <code>python3 stock_forecast_chart.py</code><br>
-  信号报告: <code>python3 stock_signal_model.py</code><br>
-  BTC交易: <code>python3 okx_live_trader.py --report</code><br>
-  早报/晚报自动更新 (cron jobs 已配置)
-</div>
-
-</div>
-<div class="footer">Jack's Market Hub | 仅供参考，不构成投资建议</div>
+<!-- TAB 3: Forecast -->
+<div id="tab-forecast" class="tab-content"><div class="loading">加载中...</div></div>
 
 <script>
-// 加载BTC价格
-fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-  .then(r=>r.json())
-  .then(d=>{
-    document.getElementById('btc-price').textContent = '$'+parseFloat(d.price).toLocaleString();
-    document.getElementById('btc-info').textContent = 'BTC/USDT 最新价 | 更新: '+new Date().toLocaleTimeString();
-  })
-  .catch(()=>{
-    document.getElementById('btc-price').textContent = '---';
-    document.getElementById('btc-info').textContent = '价格加载失败';
+// ── Tab Switching ───────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
   });
+});
+
+// ── Helper: extract chart data from script ─────
+function extractChartData(html) {
+  const match = html.match(/labels\s*=\s*(\[.*?\]);/s);
+  if (!match) return null;
+  try {
+    return eval('(' + match[1] + ')');
+  } catch { return null; }
+}
+
+// ── Load & Parse HTML (strip scripts/nav) ───────
+async function loadHTML(url) {
+  const r = await fetch(url);
+  if (!r.ok) return null;
+  const html = await r.text();
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  // Remove nav links (internal IPs)
+  doc.querySelectorAll('a[href*="192.168"]').forEach(a => a.remove());
+  // Remove script tags (will re-init manually)
+  doc.querySelectorAll('script').forEach(s => s.remove());
+  return doc.body.innerHTML;
+}
+
+// ── Tab 1: Stock Report ──────────────────────────
+async function loadReport() {
+  const html = await loadHTML('stock_report.html');
+  if (!html) return;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const target = document.getElementById('tab-report');
+  target.innerHTML = '';
+  doc.querySelectorAll('.sec, .foot').forEach(el => target.appendChild(el));
+}
+
+// ── Tab 2: BTC ──────────────────────────────────
+async function loadBTC() {
+  const html = await loadHTML('btc_trading_page.html');
+  if (!html) return;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const target = document.getElementById('tab-btc');
+  target.innerHTML = '';
+  doc.querySelectorAll('.price-banner, .metrics, .trade-banner, .signals, .chart-section, .levels').forEach(el => target.appendChild(el));
+  // Re-init Chart.js
+  const btcHtml = await fetch('btc_trading_page.html').then(r => r.text());
+  initBTCChart(btcHtml);
+}
+
+function initBTCChart(btcHtml) {
+  const scriptMatch = btcHtml.match(/const\s+labels\s*=\s*(\[[\s\S]*?\n\}\);)/);
+  if (!scriptMatch) return;
+  try {
+    const scriptContent = scriptMatch[1];
+    const evalCtx = {};
+    eval(scriptContent);
+    const ctx = document.getElementById('btcChart');
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'candle',
+      data: { labels, datasets: [{ label: 'BTC', data: closes, borderColor: '#f7931a' }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  } catch(e) { console.warn('BTC chart init failed:', e); }
+}
+
+// ── Tab 3: Forecast ──────────────────────────────
+async function loadForecast() {
+  const html = await loadHTML('stock_forecast_chart.html');
+  if (!html) return;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const target = document.getElementById('tab-forecast');
+  target.innerHTML = '';
+  doc.querySelectorAll('.header, .summary-bar, .cards-grid, .bar-section, .footer').forEach(el => target.appendChild(el));
+  // Re-init bar chart
+  const fcastHtml = await fetch('stock_forecast_chart.html').then(r => r.text());
+  initForecastChart(fcastHtml);
+}
+
+function initForecastChart(fcastHtml) {
+  // Extract JSON data
+  const dataMatch = fcastHtml.match(/const\s+stockData\s*=\s*(\[[\s\S]*?\]);/);
+  if (!dataMatch) return;
+  try {
+    const stockData = eval(dataMatch[1]);
+    const ctx = document.getElementById('barCanvas');
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: stockData.map(s => s.name),
+        datasets: [{
+          label: '上涨概率',
+          data: stockData.map(s => s.p_up.replace('%','')),
+          backgroundColor: stockData.map(s => s.signal === 'buy' ? '#22c55e' : '#64748b')
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { max: 100 } }
+      }
+    });
+  } catch(e) { console.warn('Forecast chart init failed:', e); }
+}
+
+// ── Init all ────────────────────────────────────
+loadReport();
+loadBTC();
+loadForecast();
 </script>
 </body>
 </html>
