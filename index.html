@@ -1,1018 +1,225 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>股票快报</title>
+<title>Jack's Market Hub</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px}
-.c{max-width:1700px;margin:0 auto}
-.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #1e293b}
-.hdr h1{font-size:24px;font-weight:800;color:#f8fafc}
-.hdr .sub{font-size:11px;color:#64748b;margin-top:2px}
-.hdr .time{font-size:11px;color:#64748b;text-align:right}
-.sec{margin-bottom:28px;padding:16px;background:#1e293b;border-radius:12px}
-.sec-title{font-size:15px;font-weight:700;color:#f8fafc;margin-bottom:10px;padding-bottom:8px}
-.sum-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-.sr{background:#0f172a;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.sr.g{color:#22c55e}.sr.o{color:#f59e0b}.sr.r{color:#64748b}
-.bc-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;padding:6px;background:#0f172a;border-radius:8px}
-.bc{display:flex;align-items:center;gap:10px;padding:6px 8px;border-bottom:1px solid #1e293b;font-size:11px}
-.bc:last-child{border-bottom:none}
-.bln{min-width:120px}
-.bsym{font-weight:700;font-size:12px;display:block}
-.bname{font-size:9px;color:#94a3b8}
-.bpri{font-weight:700;min-width:60px;text-align:center}
-.bmeta{flex:1;font-size:10px;color:#94a3b8}
-.brig{text-align:right;min-width:100px;display:flex;flex-direction:column;align-items:flex-end}
-.sig-pill{font-weight:600;border-radius:4px;padding:1px 6px;font-size:10px}
-.sc-num{font-size:9px;color:#64748b;margin-top:1px}
-table{width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;font-size:11px;margin-top:4px}
-th{text-align:left;padding:7px 9px;font-size:9px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #334155;white-space:nowrap}
-td{padding:7px 9px;border-bottom:1px solid #1e293b;white-space:nowrap}
-tr:last-child td{border-bottom:none}
-tr:hover{background:#263348}
-.ticker{font-weight:700;font-size:12px}
-.cname{font-size:9px;color:#94a3b8;display:block}
-.price{font-weight:700}
-.score{font-weight:700;text-align:center}
-.sig{font-weight:600;text-align:center;border-radius:4px;padding:1px 5px;font-size:10px}
-.foot{margin-top:20px;text-align:center;font-size:10px;color:#475569;padding:10px 0;border-top:1px solid #1e293b}
-.nlist{display:flex;flex-direction:column;gap:8px}
-.ni{background:#0f172a;border-radius:8px;padding:10px 12px}
-.nhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
-.ntitle{color:#e2e8f0;font-size:12px;font-weight:600;text-decoration:none;line-height:1.3}
-.ntitle:hover{color:#60a5fa}
-.sent{font-size:10px;font-weight:600;white-space:nowrap}
-.nmeta{font-size:9px;color:#64748b;margin-bottom:5px}
-.topic{background:#1e293b;padding:1px 5px;border-radius:4px;margin-right:4px;color:#94a3b8}
-.nsummary{font-size:10px;color:#94a3b8;line-height:1.4;margin-bottom:5px}
-.ntick{display:flex;gap:4px;flex-wrap:wrap}
-.tck{background:#1e3a5f;color:#60a5fa;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080810;color:#e0e0e0;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:24px 32px;border-bottom:1px solid #1f2937;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header h1{font-size:24px;color:#fff}
+.header h1 span{color:#4caf50}
+.header .date{font-size:13px;color:#888}
+.header .nav{display:flex;gap:10px;flex-wrap:wrap}
+.header .nav a{background:#1f2937;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;transition:background .2s}
+.header .nav a:hover{background:#374151}
+
+.main{max-width:1200px;margin:0 auto;padding:24px 20px}
+
+.section{background:#111827;border-radius:16px;padding:20px;margin-bottom:20px;border:1px solid #1f2937}
+.section-title{font-size:16px;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title span{font-size:20px}
+
+刷新时间: 00:34:43 &nbsp;|&nbsp;
+<a href="stock_forecast_chart.html" target="_blank" style="color:#60a5fa;text-decoration:underline">📊 预报图表</a> &nbsp;|&nbsp;
+<a href="stock_signal_model.py" style="color:#60a5fa;text-decoration:underline">📋 信号数据</a> &nbsp;|&nbsp;
+<a href="stock_forecast.py" style="color:#60a5fa;text-decoration:underline">📈 预报脚本</a>
+
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th{text-align:left;font-size:11px;color:#666;text-transform:uppercase;padding:8px 10px;background:#0d1117;border-bottom:1px solid #1f2937}
+td{padding:10px 10px;font-size:13px;border-bottom:1px solid #1a1f2e}
+tr:hover{background:#1a2030;cursor:pointer}
+.up{color:#4caf50;font-weight:600}
+.down{color:#f44336}
+.s-badge{margin-right:6px;font-size:14px}
+
+.btc-banner{background:linear-gradient(135deg,#1a2a1a,#0d1f0d);border:1px solid #1b5e20;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.btc-price{font-size:28px;font-weight:700;color:#4caf50}
+.btc-info{font-size:12px;color:#888;line-height:1.8}
+.btc-badge{background:#1b5e20;color:#4caf50;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+
+.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:12px}
+.info-card{background:#0d1117;border-radius:12px;padding:16px;border:1px solid #1f2937}
+.info-card h3{font-size:13px;color:#888;margin-bottom:8px;text-transform:uppercase}
+.info-card .val{font-size:22px;font-weight:700;color:#fff}
+
+.tips{background:#1a1a2e;border-radius:12px;padding:16px;margin-top:12px;font-size:12px;color:#888;line-height:1.8}
+
+.footer{text-align:center;color:#333;font-size:11px;padding:20px}
 </style>
 </head>
 <body>
-<div class="c">
-  <div class="hdr">
-    <div><h1>📈 股票快报</h1><div class="sub">每日三市 · 美股🇺🇸 · 港股🇭🇰 · A股🇨🇳</div></div>
-    <div class="time">2026-04-18 00:09 CST<br><span style="font-size:10px">数据: Finnhub · Yahoo Finance · Alpha Vantage新闻情绪</span></div>
+
+<div class="header">
+  <div>
+    <h1>📊 <span>Jack's</span> Market Hub</h1>
+    <div class="date">2026-04-18 GMT+8 | 数据来源: Yahoo Finance</div>
   </div>
-  
-  <div class="sec">
-<h2 class="sec-title" style="border-left:4px solid #3b82f6">🇺🇸 美股</h2>
-<div class="sum-row">
-<span class="sr g">强烈买入 0</span>
-<span class="sr o">可以考虑 6</span>
-<span class="sr r">其他 13</span>
+  <div class="nav">
+    <a href="stock_forecast_chart.html" target="_blank">📊 预报图表</a>
+    <a href="stock_signal_model.py" target="_blank">📋 信号模型</a>
+    <a href="okx_live_trader.py" target="_blank">₿ BTC交易</a>
+  </div>
 </div>
-<div class="bc-list"><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">UNH</span><span class="bname">UnitedHealth</span></div>
-<div class="bpri">$324.36</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 23.9 · 25%低位 · β0.48</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">PG</span><span class="bname">Procter & Gamble</span></div>
-<div class="bpri">$147.39</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 20.2 · 29%低位 · β0.4</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">JD</span><span class="bname">JD.com</span></div>
-<div class="bpri">$31.84</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 13.9 · -120%低位 · β0.91</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">PDD</span><span class="bname">PDD Holdings</span></div>
-<div class="bpri">$104.94</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 9.9 · 28%低位 · β0.08</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">TCEHY</span><span class="bname">Tencent</span></div>
-<div class="bpri">$65.90</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 18.0 · -146%低位 · β1.24</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">V</span><span class="bname">Visa</span></div>
-<div class="bpri">$317.77</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 28.9 · 29%低位 · β0.77</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分4</span></div>
-</div></div>
-<table>
-<thead><tr><th>代码</th><th>价格</th><th>涨跌</th><th>PE</th><th>年低位</th><th>52W Low</th><th>52W High</th><th>评分</th><th>信号</th><th>分析师</th><th>目标价</th><th>营收</th><th>净利润</th><th>EPS</th><th>流比</th></tr></thead>
-<tbody><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">UNH</span><span class="cname">UnitedHealth</span></div></div></td>
-<td class="price">$324.36</td>
-<td style="color:#22c55e;font-weight:600">+2.52%</td>
-<td>23.9</td>
-<td>25%</td>
-<td>234.6</td>
-<td>594.8</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>13.19</td>
-<td>0.95</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">PG</span><span class="cname">Procter & Gamble</span></div></div></td>
-<td class="price">$147.39</td>
-<td style="color:#22c55e;font-weight:600">+2.99%</td>
-<td>20.2</td>
-<td>29%</td>
-<td>137.6</td>
-<td>171.7</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>6.75</td>
-<td>0.72</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">JD</span><span class="cname">JD.com</span></div></div></td>
-<td class="price">$31.84</td>
-<td style="color:#22c55e;font-weight:600">+1.63%</td>
-<td>13.9</td>
-<td>-120%</td>
-<td>95.9</td>
-<td>149.5</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>6.48</td>
-<td>1.22</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">PDD</span><span class="cname">PDD Holdings</span></div></div></td>
-<td class="price">$104.94</td>
-<td style="color:#22c55e;font-weight:600">+1.19%</td>
-<td>9.9</td>
-<td>28%</td>
-<td>91.5</td>
-<td>139.4</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>16.73</td>
-<td>2.45</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">TCEHY</span><span class="cname">Tencent</span></div></div></td>
-<td class="price">$65.90</td>
-<td style="color:#22c55e;font-weight:600">+2.57%</td>
-<td>18.0</td>
-<td>-146%</td>
-<td>432</td>
-<td>683</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>23.53</td>
-<td>1.36</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">V</span><span class="cname">Visa</span></div></div></td>
-<td class="price">$317.77</td>
-<td style="color:#22c55e;font-weight:600">+0.85%</td>
-<td>28.9</td>
-<td>29%</td>
-<td>293.9</td>
-<td>375.5</td>
-<td class="score">4</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>10.65</td>
-<td>1.11</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">BABA</span><span class="cname">Alibaba</span></div></div></td>
-<td class="price">$142.31</td>
-<td style="color:#22c55e;font-weight:600">+2.68%</td>
-<td>21.5</td>
-<td>43%</td>
-<td>103.7</td>
-<td>192.7</td>
-<td class="score">3</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>4.84</td>
-<td>1.33</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">HD</span><span class="cname">Home Depot</span></div></div></td>
-<td class="price">$350.09</td>
-<td style="color:#22c55e;font-weight:600">+3.84%</td>
-<td>23.8</td>
-<td>31%</td>
-<td>315.3</td>
-<td>426.8</td>
-<td class="score">3</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>14.24</td>
-<td>1.06</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">NTES</span><span class="cname">NetEase</span></div></div></td>
-<td class="price">$118.26</td>
-<td style="color:#ef4444;font-weight:600">-0.1%</td>
-<td>14.8</td>
-<td>34%</td>
-<td>96.7</td>
-<td>159.6</td>
-<td class="score">3</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>10.49</td>
-<td>3.45</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">JPM</span><span class="cname">JPMorgan</span></div></div></td>
-<td class="price">$314.38</td>
-<td style="color:#22c55e;font-weight:600">+1.43%</td>
-<td>14.2</td>
-<td>79%</td>
-<td>226.3</td>
-<td>337.2</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>21.38</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">MSFT</span><span class="cname">Microsoft</span></div></div></td>
-<td class="price">$428.53</td>
-<td style="color:#22c55e;font-weight:600">+1.97%</td>
-<td>26.0</td>
-<td>36%</td>
-<td>355.7</td>
-<td>555.5</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>15.98</td>
-<td>1.39</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">MA</span><span class="cname">Mastercard</span></div></div></td>
-<td class="price">$525.39</td>
-<td style="color:#22c55e;font-weight:600">+1.32%</td>
-<td>31.0</td>
-<td>37%</td>
-<td>480.5</td>
-<td>601.8</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>16.52</td>
-<td>1.03</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">DIS</span><span class="cname">Walt Disney</span></div></div></td>
-<td class="price">$106.28</td>
-<td style="color:#22c55e;font-weight:600">+2.29%</td>
-<td>15.1</td>
-<td>57%</td>
-<td>82.0</td>
-<td>124.7</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>6.79</td>
-<td>0.67</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">META</span><span class="cname">Meta Platforms</span></div></div></td>
-<td class="price">$684.96</td>
-<td style="color:#22c55e;font-weight:600">+1.2%</td>
-<td>28.1</td>
-<td>65%</td>
-<td>479.8</td>
-<td>796.2</td>
-<td class="score">1</td>
-<td class="sig" style="background:rgba(239,68,68,0.15);color:#ef4444">不推荐</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>23.49</td>
-<td>2.6</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">AMZN</span><span class="cname">Amazon</span></div></div></td>
-<td class="price">$254.01</td>
-<td style="color:#22c55e;font-weight:600">+1.73%</td>
-<td>34.0</td>
-<td>95%</td>
-<td>165.3</td>
-<td>258.6</td>
-<td class="score">1</td>
-<td class="sig" style="background:rgba(239,68,68,0.15);color:#ef4444">不推荐</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>7.17</td>
-<td>1.05</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">GOOGL</span><span class="cname">Alphabet</span></div></div></td>
-<td class="price">$338.62</td>
-<td style="color:#22c55e;font-weight:600">+0.77%</td>
-<td>30.6</td>
-<td>95%</td>
-<td>146.1</td>
-<td>349</td>
-<td class="score">1</td>
-<td class="sig" style="background:rgba(239,68,68,0.15);color:#ef4444">不推荐</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>10.81</td>
-<td>2.01</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">NVDA</span><span class="cname">NVIDIA</span></div></div></td>
-<td class="price">$200.93</td>
-<td style="color:#22c55e;font-weight:600">+1.3%</td>
-<td>39.8</td>
-<td>90%</td>
-<td>95.0</td>
-<td>212.2</td>
-<td class="score">1</td>
-<td class="sig" style="background:rgba(239,68,68,0.15);color:#ef4444">不推荐</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>4.9</td>
-<td>3.91</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">AAPL</span><span class="cname">Apple Inc.</span></div></div></td>
-<td class="price">$271.28</td>
-<td style="color:#22c55e;font-weight:600">+2.99%</td>
-<td>32.8</td>
-<td>82%</td>
-<td>189.8</td>
-<td>288.6</td>
-<td class="score">1</td>
-<td class="sig" style="background:rgba(239,68,68,0.15);color:#ef4444">不推荐</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>7.9</td>
-<td>0.97</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">TSLA</span><span class="cname">Tesla</span></div></div></td>
-<td class="price">$407.81</td>
-<td style="color:#22c55e;font-weight:600">+4.86%</td>
-<td>384.6</td>
-<td>67%</td>
-<td>222.8</td>
-<td>498.8</td>
-<td class="score">0</td>
-<td class="sig" style="background:rgba(239,68,68,0.15);color:#ef4444">不推荐</td>
-<td style="color:#f59e0b;font-weight:600">持有</td>
-<td style="color:#6b7280">N/A</td>
-<td>N/A</td>
-<td>N/A</td>
-<td>1.08</td>
-<td>2.16</td>
-</tr></tbody>
-</table>
+
+<div class="main">
+
+<!-- BTC状态 -->
+<div class="btc-banner">
+  <div>
+    <div class="btc-price" id="btc-price">Loading...</div>
+    <div class="btc-info" id="btc-info">BTC/USDT 行情加载中</div>
+  </div>
+  <div class="btc-badge" id="btc-signal">信号: --</div>
 </div>
-  <div class="sec">
-<h2 class="sec-title" style="border-left:4px solid #ef4444">🇭🇰 港股</h2>
-<div class="sum-row">
-<span class="sr g">强烈买入 4</span>
-<span class="sr o">可以考虑 5</span>
-<span class="sr r">其他 6</span>
+
+<!-- 次日预报 -->
+<div class="section">
+  <div class="section-title">📈 <span>↑</span> 次日价格预报 Top5 <span style="font-size:12px;color:#666;font-weight:400;margin-left:8px">| 点击行查看完整图表</span></div>
+  <table>
+    <tr><th>股票</th><th>现价</th><th>明日期望</th><th>68%区间</th><th>上涨概率</th><th>RSI</th><th>年化波幅</th></tr>
+    
+        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
+          <td><span class="s-badge">🟢</span>AAPL</td>
+          <td>$271.18</td>
+          <td>$271.62</td>
+          <td>$267~$276</td>
+          <td class="up">54%</td>
+          <td style="color:#ff9800">74</td>
+          <td>26%</td>
+        </tr>
+        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
+          <td><span class="s-badge">🟢</span>JD</td>
+          <td>$31.80</td>
+          <td>$31.85</td>
+          <td>$31~$32</td>
+          <td class="up">53%</td>
+          <td style="color:#ff9800">81</td>
+          <td>34%</td>
+        </tr>
+        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
+          <td><span class="s-badge">🟢</span>AMZN</td>
+          <td>$253.92</td>
+          <td>$254.32</td>
+          <td>$249~$259</td>
+          <td class="up">53%</td>
+          <td style="color:#f44336">98</td>
+          <td>34%</td>
+        </tr>
+        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
+          <td><span class="s-badge">🟢</span>NVDA</td>
+          <td>$200.95</td>
+          <td>$201.29</td>
+          <td>$196~$206</td>
+          <td class="up">53%</td>
+          <td style="color:#f44336">93</td>
+          <td>37%</td>
+        </tr>
+        <tr onclick="window.open('stock_forecast_chart.html','_blank')">
+          <td><span class="s-badge">🟡</span>META</td>
+          <td>$685.19</td>
+          <td>$686.10</td>
+          <td>$666~$704</td>
+          <td class="up">52%</td>
+          <td style="color:#f44336">96</td>
+          <td>44%</td>
+        </tr>
+  </table>
+  <div class="tips">
+    💡 <b>如何使用:</b> 点击任意行可打开完整K线图表 | 68%区间表示明收盘价有68%概率落在该区间 | 上涨概率基于30日波动率统计
+  </div>
 </div>
-<div class="bc-list"><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">0700.HK</span><span class="bname">腾讯控股</span></div>
-<div class="bpri">¥510.50</div>
-<div class="bmeta"><span style="color:#22c55e;font-weight:600">强烈买入</span> · PE 18.4 · 27%低位 · β0.8</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">3690.HK</span><span class="bname">美团</span></div>
-<div class="bpri">¥86.50</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 15.5 · 17%低位 · β0.2</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">1024.HK</span><span class="bname">快手</span></div>
-<div class="bpri">¥46.46</div>
-<div class="bmeta"><span style="color:#22c55e;font-weight:600">强烈买入</span> · PE 9.6 · 5%低位 · β1.24</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">1810.HK</span><span class="bname">小米集团</span></div>
-<div class="bpri">¥32.00</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 17.9 · 6%低位 · β0.79</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">9988.HK</span><span class="bname">阿里巴巴</span></div>
-<div class="bpri">¥136.40</div>
-<div class="bmeta"><span style="color:#22c55e;font-weight:600">强烈买入</span> · PE 24.5 · 41%低位 · β0.49</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">9999.HK</span><span class="bname">网易</span></div>
-<div class="bpri">¥182.30</div>
-<div class="bmeta"><span style="color:#22c55e;font-weight:600">强烈买入</span> · PE 15.1 · 33%低位 · β0.82</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">2382.HK</span><span class="bname">舜宇光学</span></div>
-<div class="bpri">¥64.10</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 18.6 · 32%低位 · β0.96</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">0941.HK</span><span class="bname">中国移动</span></div>
-<div class="bpri">¥81.45</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 11.2 · 46%低位 · β0.21</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">6618.HK</span><span class="bname">京东健康</span></div>
-<div class="bpri">¥48.46</div>
-<div class="bmeta"><span style="color:#22c55e;font-weight:600">强烈买入</span> · PE 25.1 · 37%低位 · β1.2</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分4</span></div>
-</div></div>
-<table>
-<thead><tr><th>代码</th><th>价格</th><th>涨跌</th><th>PE</th><th>年低位</th><th>52W Low</th><th>52W High</th><th>评分</th><th>信号</th><th>分析师</th><th>目标价</th><th>营收</th><th>净利润</th><th>EPS</th><th>流比</th></tr></thead>
-<tbody><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">0700.HK</span><span class="cname">腾讯控股</span></div></div></td>
-<td class="price">¥510.50</td>
-<td style="color:#ef4444;font-weight:600">-1.26%</td>
-<td>18.4</td>
-<td>27%</td>
-<td>445.9</td>
-<td>683.0</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥719.9 (+41%)</td>
-<td>¥7517.7亿</td>
-<td>¥2248.4亿</td>
-<td>27.76</td>
-<td>1.44</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">3690.HK</span><span class="cname">美团</span></div></div></td>
-<td class="price">¥86.50</td>
-<td style="color:#ef4444;font-weight:600">-2.54%</td>
-<td>15.5</td>
-<td>17%</td>
-<td>73.6</td>
-<td>149.8</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥111.3 (+29%)</td>
-<td>¥3648.5亿</td>
-<td>¥-233.6亿</td>
-<td>-4.51</td>
-<td>1.82</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">1024.HK</span><span class="cname">快手</span></div></div></td>
-<td class="price">¥46.46</td>
-<td style="color:#ef4444;font-weight:600">-1.27%</td>
-<td>9.6</td>
-<td>5%</td>
-<td>44.2</td>
-<td>92.6</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥74.4 (+60%)</td>
-<td>¥1427.8亿</td>
-<td>¥186.2亿</td>
-<td>4.86</td>
-<td>1.15</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">1810.HK</span><span class="cname">小米集团</span></div></div></td>
-<td class="price">¥32.00</td>
-<td style="color:#ef4444;font-weight:600">-0.19%</td>
-<td>17.9</td>
-<td>6%</td>
-<td>30.3</td>
-<td>61.5</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥44.0 (+37%)</td>
-<td>¥4572.9亿</td>
-<td>¥416.4亿</td>
-<td>1.79</td>
-<td>1.32</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">9988.HK</span><span class="cname">阿里巴巴</span></div></div></td>
-<td class="price">¥136.40</td>
-<td style="color:#22c55e;font-weight:600">+0.44%</td>
-<td>24.5</td>
-<td>41%</td>
-<td>101.8</td>
-<td>186.2</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥184.8 (+35%)</td>
-<td>¥10167.4亿</td>
-<td>¥928.1亿</td>
-<td>5.57</td>
-<td>1.33</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">9999.HK</span><span class="cname">网易</span></div></div></td>
-<td class="price">¥182.30</td>
-<td style="color:#ef4444;font-weight:600">-2.3%</td>
-<td>15.1</td>
-<td>33%</td>
-<td>150.8</td>
-<td>247.6</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥255.0 (+40%)</td>
-<td>¥1126.3亿</td>
-<td>¥337.6亿</td>
-<td>12.04</td>
-<td>3.45</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">2382.HK</span><span class="cname">舜宇光学</span></div></div></td>
-<td class="price">¥64.10</td>
-<td style="color:#22c55e;font-weight:600">+1.02%</td>
-<td>18.6</td>
-<td>32%</td>
-<td>51.5</td>
-<td>91.4</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥81.6 (+27%)</td>
-<td>¥432.3亿</td>
-<td>¥46.4亿</td>
-<td>3.45</td>
-<td>1.57</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">0941.HK</span><span class="cname">中国移动</span></div></div></td>
-<td class="price">¥81.45</td>
-<td style="color:#ef4444;font-weight:600">-0.18%</td>
-<td>11.2</td>
-<td>46%</td>
-<td>75.2</td>
-<td>88.9</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥97.7 (+20%)</td>
-<td>¥10501.9亿</td>
-<td>¥1370.9亿</td>
-<td>7.24</td>
-<td>0.81</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">6618.HK</span><span class="cname">京东健康</span></div></div></td>
-<td class="price">¥48.46</td>
-<td style="color:#ef4444;font-weight:600">-3.04%</td>
-<td>25.1</td>
-<td>37%</td>
-<td>34.6</td>
-<td>71.7</td>
-<td class="score">4</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥76.3 (+57%)</td>
-<td>¥734.4亿</td>
-<td>¥53.8亿</td>
-<td>1.93</td>
-<td>2.72</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">9618.HK</span><span class="cname">京东物流</span></div></div></td>
-<td class="price">¥122.60</td>
-<td style="color:#ef4444;font-weight:600">-0.97%</td>
-<td>16.5</td>
-<td>57%</td>
-<td>95.5</td>
-<td>143.2</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥154.1 (+26%)</td>
-<td>¥13090.9亿</td>
-<td>¥196.3亿</td>
-<td>7.42</td>
-<td>1.22</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">2319.HK</span><span class="cname">蒙牛乳业</span></div></div></td>
-<td class="price">¥16.53</td>
-<td style="color:#ef4444;font-weight:600">-1.08%</td>
-<td>36.7</td>
-<td>42%</td>
-<td>13.9</td>
-<td>20.1</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥22.0 (+33%)</td>
-<td>¥822.4亿</td>
-<td>¥15.5亿</td>
-<td>0.45</td>
-<td>1.0</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">2628.HK</span><span class="cname">中国人寿</span></div></div></td>
-<td class="price">¥27.74</td>
-<td style="color:#ef4444;font-weight:600">-1.14%</td>
-<td>4.4</td>
-<td>64%</td>
-<td>13.0</td>
-<td>36.2</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥35.4 (+28%)</td>
-<td>¥3518.8亿</td>
-<td>¥1540.8亿</td>
-<td>6.26</td>
-<td>0.34</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">1398.HK</span><span class="cname">工商银行</span></div></div></td>
-<td class="price">¥7.03</td>
-<td style="color:#22c55e;font-weight:600">+0.57%</td>
-<td>6.1</td>
-<td>97%</td>
-<td>4.9</td>
-<td>7.1</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥7.6 (+8%)</td>
-<td>¥6684.2亿</td>
-<td>¥3568.0亿</td>
-<td>1.15</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">3968.HK</span><span class="cname">招商银行(港)</span></div></div></td>
-<td class="price">¥50.55</td>
-<td style="color:#ef4444;font-weight:600">-1.46%</td>
-<td>7.7</td>
-<td>80%</td>
-<td>39.4</td>
-<td>53.3</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥58.0 (+15%)</td>
-<td>¥2922.1亿</td>
-<td>¥1438.7亿</td>
-<td>6.55</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">6160.HK</span><span class="cname">京东集团</span></div></div></td>
-<td class="price">¥193.20</td>
-<td style="color:#ef4444;font-weight:600">-1.68%</td>
-<td>129.7</td>
-<td>65%</td>
-<td>125.1</td>
-<td>229.4</td>
-<td class="score">0</td>
-<td class="sig" style="background:rgba(239,68,68,0.15);color:#ef4444">不推荐</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥252.2 (+31%)</td>
-<td>¥53.4亿</td>
-<td>¥2.9亿</td>
-<td>1.49</td>
-<td>3.41</td>
-</tr></tbody>
-</table>
+
+<!-- 股票信号 -->
+<div class="section">
+  <div class="section-title">🛎️ <span>★</span> 股票信号 Top5 <span style="font-size:12px;color:#666;font-weight:400;margin-left:8px">| 技术面(40%) + 机构面(40%) + RSI修正</span></div>
+  <table>
+    <tr><th>信号</th><th>现价</th><th>上涨空间</th><th>置信度</th><th>RSI</th><th>评级</th></tr>
+    
+        <tr>
+          <td>🟢强烈买入 PDD</td>
+          <td>$104.85</td>
+          <td>+37%</td>
+          <td>77%</td>
+          <td>62</td>
+          <td>buy</td>
+        </tr>
+        <tr>
+          <td>🟡买入 NVDA</td>
+          <td>$200.91</td>
+          <td>+34%</td>
+          <td>59%</td>
+          <td>93</td>
+          <td>strong_buy</td>
+        </tr>
+        <tr>
+          <td>🟡买入 META</td>
+          <td>$685.08</td>
+          <td>+25%</td>
+          <td>59%</td>
+          <td>96</td>
+          <td>strong_buy</td>
+        </tr>
+        <tr>
+          <td>🟡买入 MSFT</td>
+          <td>$428.46</td>
+          <td>+35%</td>
+          <td>57%</td>
+          <td>93</td>
+          <td>strong_buy</td>
+        </tr>
+        <tr>
+          <td>🟡买入 GOOGL</td>
+          <td>$338.61</td>
+          <td>+11%</td>
+          <td>57%</td>
+          <td>93</td>
+          <td>strong_buy</td>
+        </tr>
+  </table>
 </div>
-  <div class="sec">
-<h2 class="sec-title" style="border-left:4px solid #f59e0b">🇨🇳 A股</h2>
-<div class="sum-row">
-<span class="sr g">强烈买入 8</span>
-<span class="sr o">可以考虑 3</span>
-<span class="sr r">其他 4</span>
+
+<!-- 快捷入口 -->
+<div class="grid-2">
+  <div class="info-card">
+    <h3>预报覆盖</h3>
+    <div class="val">14 只</div>
+    <div style="font-size:11px;color:#666;margin-top:4px">次日内价格区间 + 涨跌概率</div>
+  </div>
+  <div class="info-card">
+    <h3>信号覆盖</h3>
+    <div class="val">14 只</div>
+    <div style="font-size:11px;color:#666;margin-top:4px">技术面 + 机构面 综合评分</div>
+  </div>
 </div>
-<div class="bc-list"><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">600036.SS</span><span class="bname">招商银行</span></div>
-<div class="bpri">¥39.52</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 6.9 · 27%低位 · β0.69</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">600030.SS</span><span class="bname">中信证券</span></div>
-<div class="bpri">¥26.26</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 13.4 · 30%低位 · β0.81</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">600900.SS</span><span class="bname">长江电力</span></div>
-<div class="bpri">¥26.38</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 19.7 · 24%低位 · β0.09</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">601166.SS</span><span class="bname">兴业银行</span></div>
-<div class="bpri">¥18.40</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 5.7 · 8%低位 · β0.38</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">000001.SZ</span><span class="bname">平安银行</span></div>
-<div class="bpri">¥11.01</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 5.3 · 25%低位 · β0.72</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">000858.SZ</span><span class="bname">五粮液</span></div>
-<div class="bpri">¥101.86</div>
-<div class="bmeta"><span style="color:#84cc16;font-weight:600">买入</span> · PE 13.9 · 6%低位 · β0.59</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">600887.SS</span><span class="bname">伊利股份</span></div>
-<div class="bpri">¥25.39</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 20.0 · 1%低位 · β0.36</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#22c55e">601111.SS</span><span class="bname">中国国航</span></div>
-<div class="bpri">¥6.92</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 22.4 · 18%低位 · β0.45</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</span><span class="sc-num">评分7</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">601888.SS</span><span class="bname">中国中免</span></div>
-<div class="bpri">¥66.79</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 38.6 · 20%低位 · β0.65</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分6</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">600519.SS</span><span class="bname">贵州茅台</span></div>
-<div class="bpri">¥1407.24</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 19.6 · 32%低位 · β0.53</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div><div class="bc">
-<div class="bln"><span class="bsym" style="color:#f59e0b">601318.SS</span><span class="bname">中国平安</span></div>
-<div class="bpri">¥57.92</div>
-<div class="bmeta"><span style="color:#6b7280;font-weight:600">N/A</span> · PE 7.8 · 38%低位 · β0.77</div>
-<div class="brig"><span class="sig-pill" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</span><span class="sc-num">评分5</span></div>
-</div></div>
-<table>
-<thead><tr><th>代码</th><th>价格</th><th>涨跌</th><th>PE</th><th>年低位</th><th>52W Low</th><th>52W High</th><th>评分</th><th>信号</th><th>分析师</th><th>目标价</th><th>营收</th><th>净利润</th><th>EPS</th><th>流比</th></tr></thead>
-<tbody><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">600036.SS</span><span class="cname">招商银行</span></div></div></td>
-<td class="price">¥39.52</td>
-<td style="color:#ef4444;font-weight:600">-0.98%</td>
-<td>6.9</td>
-<td>27%</td>
-<td>37.3</td>
-<td>45.4</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥2922.1亿</td>
-<td>¥1438.7亿</td>
-<td>5.7</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">600030.SS</span><span class="cname">中信证券</span></div></div></td>
-<td class="price">¥26.26</td>
-<td style="color:#ef4444;font-weight:600">-0.19%</td>
-<td>13.4</td>
-<td>30%</td>
-<td>23.8</td>
-<td>32.2</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥821.0亿</td>
-<td>¥326.4亿</td>
-<td>1.96</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">600900.SS</span><span class="cname">长江电力</span></div></div></td>
-<td class="price">¥26.38</td>
-<td style="color:#ef4444;font-weight:600">-0.64%</td>
-<td>19.7</td>
-<td>24%</td>
-<td>25.2</td>
-<td>30.2</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥858.8亿</td>
-<td>¥341.7亿</td>
-<td>1.34</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">601166.SS</span><span class="cname">兴业银行</span></div></div></td>
-<td class="price">¥18.40</td>
-<td style="color:#ef4444;font-weight:600">-1.13%</td>
-<td>5.7</td>
-<td>8%</td>
-<td>17.8</td>
-<td>24.7</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥1546.9亿</td>
-<td>¥727.4亿</td>
-<td>3.21</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">000001.SZ</span><span class="cname">平安银行</span></div></div></td>
-<td class="price">¥11.01</td>
-<td style="color:#ef4444;font-weight:600">-0.72%</td>
-<td>5.3</td>
-<td>25%</td>
-<td>10.3</td>
-<td>13.1</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥13.3 (+21%)</td>
-<td>¥910.4亿</td>
-<td>¥401.1亿</td>
-<td>2.07</td>
-<td>N/A</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">000858.SZ</span><span class="cname">五粮液</span></div></div></td>
-<td class="price">¥101.86</td>
-<td style="color:#ef4444;font-weight:600">-1.53%</td>
-<td>13.9</td>
-<td>6%</td>
-<td>100.0</td>
-<td>130.7</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥134.3 (+32%)</td>
-<td>¥822.0亿</td>
-<td>¥284.3亿</td>
-<td>7.32</td>
-<td>4.59</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">600887.SS</span><span class="cname">伊利股份</span></div></div></td>
-<td class="price">¥25.39</td>
-<td style="color:#ef4444;font-weight:600">-0.82%</td>
-<td>20.0</td>
-<td>1%</td>
-<td>25.4</td>
-<td>29.5</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥1173.0亿</td>
-<td>¥80.1亿</td>
-<td>1.27</td>
-<td>0.75</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">601111.SS</span><span class="cname">中国国航</span></div></div></td>
-<td class="price">¥6.92</td>
-<td style="color:#ef4444;font-weight:600">-1.0%</td>
-<td>22.4</td>
-<td>18%</td>
-<td>6.4</td>
-<td>9.4</td>
-<td class="score">7</td>
-<td class="sig" style="background:rgba(34,197,94,0.15);color:#22c55e">强烈买入</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥1714.8亿</td>
-<td>¥-17.7亿</td>
-<td>-0.11</td>
-<td>0.3</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">601888.SS</span><span class="cname">中国中免</span></div></div></td>
-<td class="price">¥66.79</td>
-<td style="color:#ef4444;font-weight:600">-2.48%</td>
-<td>38.6</td>
-<td>20%</td>
-<td>58.6</td>
-<td>99.8</td>
-<td class="score">6</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥536.9亿</td>
-<td>¥35.9亿</td>
-<td>1.73</td>
-<td>5.83</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">600519.SS</span><span class="cname">贵州茅台</span></div></div></td>
-<td class="price">¥1407.24</td>
-<td style="color:#ef4444;font-weight:600">-3.8%</td>
-<td>19.6</td>
-<td>32%</td>
-<td>1322.0</td>
-<td>1586.3</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥1785.8亿</td>
-<td>¥900.3亿</td>
-<td>71.68</td>
-<td>6.62</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">601318.SS</span><span class="cname">中国平安</span></div></div></td>
-<td class="price">¥57.92</td>
-<td style="color:#ef4444;font-weight:600">-1.03%</td>
-<td>7.8</td>
-<td>38%</td>
-<td>47.4</td>
-<td>74.9</td>
-<td class="score">5</td>
-<td class="sig" style="background:rgba(245,158,11,0.15);color:#f59e0b">可以考虑</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥9557.0亿</td>
-<td>¥1347.8亿</td>
-<td>7.44</td>
-<td>1.87</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">688981.SS</span><span class="cname">中芯国际</span></div></div></td>
-<td class="price">¥105.23</td>
-<td style="color:#22c55e;font-weight:600">+1.01%</td>
-<td>172.5</td>
-<td>34%</td>
-<td>80.9</td>
-<td>153.0</td>
-<td class="score">3</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#6b7280">N/A</td>
-<td>¥93.3亿</td>
-<td>¥6.9亿</td>
-<td>0.61</td>
-<td>2.29</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">000333.SZ</span><span class="cname">美的集团</span></div></div></td>
-<td class="price">¥78.65</td>
-<td style="color:#22c55e;font-weight:600">+0.96%</td>
-<td>13.7</td>
-<td>73%</td>
-<td>66.7</td>
-<td>83.2</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#22c55e;font-weight:600">强烈买入</td>
-<td style="color:#22c55e">¥93.8 (+19%)</td>
-<td>¥4564.5亿</td>
-<td>¥438.3亿</td>
-<td>5.76</td>
-<td>1.21</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">002594.SZ</span><span class="cname">比亚迪</span></div></div></td>
-<td class="price">¥103.78</td>
-<td style="color:#ef4444;font-weight:600">-1.67%</td>
-<td>29.0</td>
-<td>35%</td>
-<td>85.9</td>
-<td>137.1</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#84cc16;font-weight:600">买入</td>
-<td style="color:#22c55e">¥121.8 (+17%)</td>
-<td>¥8039.6亿</td>
-<td>¥323.3亿</td>
-<td>3.58</td>
-<td>0.79</td>
-</tr><tr>
-<td class="sym-cell"><div class="ln"><div><span class="ticker">002415.SZ</span><span class="cname">海康威视</span></div></div></td>
-<td class="price">¥33.13</td>
-<td style="color:#ef4444;font-weight:600">-1.22%</td>
-<td>23.2</td>
-<td>80%</td>
-<td>26.7</td>
-<td>34.8</td>
-<td class="score">2</td>
-<td class="sig" style="background:rgba(249,115,22,0.15);color:#f97316">观望</td>
-<td style="color:#6b7280;font-weight:600">N/A</td>
-<td style="color:#22c55e">¥36.9 (+11%)</td>
-<td>¥925.2亿</td>
-<td>¥141.9亿</td>
-<td>1.43</td>
-<td>N/A</td>
-</tr></tbody>
-</table>
+
+<div class="tips">
+  📌 <b>更新方式:</b><br>
+  预报图表: <code>python3 stock_forecast_chart.py</code><br>
+  信号报告: <code>python3 stock_signal_model.py</code><br>
+  BTC交易: <code>python3 okx_live_trader.py --report</code><br>
+  早报/晚报自动更新 (cron jobs 已配置)
 </div>
-  <div class="foot">股票快报 · Finnhub · Yahoo Finance · Alpha Vantage新闻情绪 · 不作为投资建议</div>
+
 </div>
+<div class="footer">Jack's Market Hub | 仅供参考，不构成投资建议</div>
+
+<script>
+// 加载BTC价格
+fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('btc-price').textContent = '$'+parseFloat(d.price).toLocaleString();
+    document.getElementById('btc-info').textContent = 'BTC/USDT 最新价 | 更新: '+new Date().toLocaleTimeString();
+  })
+  .catch(()=>{
+    document.getElementById('btc-price').textContent = '---';
+    document.getElementById('btc-info').textContent = '价格加载失败';
+  });
+</script>
 </body>
 </html>
