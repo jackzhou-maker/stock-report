@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>次日股票预报 2026-04-19</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;padding:20px}
+.header{text-align:center;margin-bottom:24px}
+.header h1{font-size:22px;color:#fff;margin-bottom:4px}
+.header p{font-size:12px;color:#888}
+.summary-bar{display:flex;gap:16px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+.s-card{background:#1a1a2e;border-radius:10px;padding:12px 20px;text-align:center;min-width:100px}
+.s-card .sc{font-size:20px;font-weight:700;color:#4caf50}
+.s-card .sl{font-size:10px;color:#888;margin-top:2px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:20px}
+.card{background:#13132a;border-radius:12px;padding:14px;border:1px solid #222}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.stock-name{font-size:16px;font-weight:700;color:#fff;min-width:50px}
+.stock-price{font-size:16px;color:#fff}
+.stock-chg{font-size:12px}
+.signal-badge{margin-left:auto;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.card-metrics{display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.metric{display:flex;flex-direction:column}
+.m-label{font-size:9px;color:#666;text-transform:uppercase}
+.m-val{font-size:14px;font-weight:600}
+.chart-wrap{height:120px;margin:8px 0}
+.price-bands{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.band{background:#1a1a2e;border-radius:6px;padding:6px 8px}
+.b-label{font-size:9px;color:#666;display:block}
+.b-val{font-size:12px;font-weight:600}
+.trend-info{font-size:10px;color:#888;margin-top:6px;text-align:right}
+.bar-section{margin-top:32px;background:#13132a;border-radius:12px;padding:20px}
+.section-title{font-size:16px;color:#fff;margin-bottom:16px}
+.bar-wrap{height:280px}
+.footer{text-align:center;color:#444;font-size:11px;margin-top:40px;padding:10px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📊 个股次日价格预报</h1>
+  <p>预测日: 2026-04-19 | 依据: 2026-04-18 00:10 | 样本: 60日历史波动率</p>
+</div>
+
+<!-- 汇总卡片 -->
+<div class="summary-bar">
+  <div class="s-card"><div class="sc">14</div><div class="sl">股票数</div></div>
+  <div class="s-card"><div class="sc">4</div><div class="sl">偏多(≥52%)</div></div>
+  <div class="s-card"><div class="sc">6</div><div class="sl">RSI超买(>85)</div></div>
+  <div class="s-card"><div class="sc">6</div><div class="sl">高波幅(>35%)</div></div>
+</div>
+
+<!-- 汇总柱状图 -->
+<div class="bar-section">
+  <div class="section-title">📈 上涨概率 vs RSI (降序排列)</div>
+  <div class="bar-wrap">
+    <canvas id="barChart"></canvas>
+  </div>
+</div>
+
+<!-- 个股卡片 -->
+<div class="cards-grid">
+
+  <div class="card" id="card-AAPL">
+    <div class="card-header">
+      <span class="stock-name">AAPL</span>
+      <span class="stock-price">$271.18</span>
+      <span class="stock-chg" style="color:green">+2.95%</span>
+      <span class="signal-badge" style="background:green20;color:green">🟢 54%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$271.62</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:green">54%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:orange">74</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">26%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-AAPL" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$262 ~ $280</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$267 ~ $276</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$267 / $262</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$276 / $280</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$263.81 | MA20=$256.43</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-AAPL');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [257.46, 259.88, 260.83, 260.81, 255.76, 250.12, 252.82, 254.23, 249.94, 248.96, 247.99, 251.49, 251.64, 252.62, 252.89, 248.80, 246.63, 253.79, 255.63, 255.92, 258.86, 253.50, 258.90, 260.49, 260.48, 259.20, 258.83, 266.43, 263.40, 271.18];
+    var highs  = [258.77, 261.15, 262.48, 262.13, 258.95, 256.33, 253.89, 255.13, 254.94, 251.83, 249.20, 254.60, 254.83, 255.00, 257.00, 255.49, 250.87, 255.48, 256.18, 256.13, 262.16, 256.20, 259.75, 261.12, 262.19, 260.18, 261.93, 266.56, 267.16, 272.30];
+    var lows   = [254.37, 253.68, 256.95, 259.55, 254.18, 249.52, 249.88, 252.18, 249.00, 247.30, 246.00, 250.28, 249.55, 251.60, 250.77, 248.07, 245.51, 247.10, 253.33, 250.65, 256.46, 245.70, 256.53, 256.07, 259.02, 256.66, 257.19, 257.81, 261.27, 266.72];
+    var r68_lo = 266.72;
+    var r68_hi = 275.64;
+    var expected = 271.62;
+    var price = 271.18;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-JD">
+    <div class="card-header">
+      <span class="stock-name">JD</span>
+      <span class="stock-price">$31.80</span>
+      <span class="stock-chg" style="color:green">+1.48%</span>
+      <span class="signal-badge" style="background:green20;color:green">🟢 53%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$31.85</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:green">53%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:orange">81</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">34%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-JD" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$30 ~ $33</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$31 ~ $32</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$31 / $30</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$32 / $33</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$30.96 | MA20=$28.55</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-JD');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [26.10, 26.52, 26.78, 27.14, 26.98, 27.35, 27.51, 27.56, 27.23, 27.06, 26.33, 26.59, 26.52, 28.73, 28.18, 27.71, 27.94, 28.55, 27.88, 27.48, 27.53, 27.48, 28.05, 28.34, 28.93, 28.94, 31.25, 31.47, 31.33, 31.80];
+    var highs  = [26.39, 26.61, 27.21, 27.19, 27.39, 27.53, 28.23, 27.80, 27.87, 27.19, 26.83, 26.83, 26.62, 28.92, 28.57, 28.24, 28.19, 28.60, 28.34, 27.81, 27.81, 27.52, 28.51, 28.55, 29.01, 29.01, 31.25, 31.76, 31.95, 32.05];
+    var lows   = [25.33, 25.89, 26.57, 26.82, 26.95, 27.14, 27.31, 27.50, 27.22, 26.22, 26.15, 26.41, 26.30, 27.55, 27.93, 27.66, 27.77, 27.83, 27.79, 27.35, 27.44, 27.09, 28.00, 27.90, 28.58, 28.46, 29.66, 30.93, 31.15, 31.61];
+    var r68_lo = 31.11;
+    var r68_hi = 32.48;
+    var expected = 31.85;
+    var price = 31.8;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-AMZN">
+    <div class="card-header">
+      <span class="stock-name">AMZN</span>
+      <span class="stock-price">$253.92</span>
+      <span class="stock-chg" style="color:green">+1.69%</span>
+      <span class="signal-badge" style="background:green20;color:green">🟢 53%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$254.32</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:green">53%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:red">98</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">34%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-AMZN" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$243 ~ $265</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$249 ~ $259</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$249 / $243</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$259 / $265</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$248.21 | MA20=$221.59</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-AMZN');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [213.21, 213.49, 214.33, 212.65, 209.53, 207.67, 211.74, 215.20, 209.87, 208.76, 205.37, 210.14, 207.24, 211.71, 207.54, 199.34, 200.95, 208.27, 210.57, 209.77, 212.79, 213.77, 221.25, 233.65, 238.38, 239.89, 249.02, 248.50, 249.70, 253.92];
+    var highs  = [217.32, 213.82, 215.65, 217.00, 211.71, 210.56, 212.72, 215.70, 215.14, 209.12, 207.54, 212.80, 209.35, 213.07, 212.89, 206.60, 203.80, 210.28, 213.58, 212.21, 212.95, 213.97, 226.10, 233.80, 240.43, 240.00, 252.18, 250.44, 250.00, 256.18];
+    var lows   = [212.53, 207.11, 212.43, 211.35, 208.15, 206.22, 207.45, 212.43, 208.83, 206.05, 204.32, 209.51, 206.64, 209.90, 207.12, 199.14, 199.98, 204.14, 208.19, 204.90, 209.59, 209.08, 219.62, 223.27, 235.21, 235.75, 241.78, 247.20, 244.20, 252.20];
+    var r68_lo = 248.53;
+    var r68_hi = 259.31;
+    var expected = 254.32;
+    var price = 253.92;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-NVDA">
+    <div class="card-header">
+      <span class="stock-name">NVDA</span>
+      <span class="stock-price">$200.95</span>
+      <span class="stock-chg" style="color:green">+1.31%</span>
+      <span class="signal-badge" style="background:green20;color:green">🟢 53%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$201.29</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:green">53%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:red">93</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">37%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-NVDA" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$192 ~ $210</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$196 ~ $206</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$196 / $192</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$206 / $210</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$196.80 | MA20=$181.40</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-NVDA');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [177.81, 182.64, 184.76, 186.03, 183.14, 180.25, 183.22, 181.93, 180.40, 178.56, 172.70, 175.64, 175.20, 178.68, 171.24, 167.52, 165.17, 174.40, 175.75, 177.39, 177.64, 178.10, 182.08, 183.91, 188.63, 189.31, 196.51, 198.87, 198.35, 200.95];
+    var highs  = [182.75, 182.90, 186.43, 187.62, 184.94, 186.09, 188.88, 185.40, 183.38, 179.98, 178.26, 178.37, 176.22, 181.22, 176.51, 170.97, 169.45, 174.62, 177.37, 177.49, 177.79, 178.23, 185.26, 184.08, 190.00, 189.66, 196.51, 200.40, 199.85, 201.68];
+    var lows   = [176.81, 175.55, 182.00, 184.45, 181.75, 179.94, 181.41, 181.68, 180.33, 175.79, 171.72, 174.76, 173.98, 176.85, 171.14, 167.01, 164.27, 166.96, 174.75, 171.37, 175.76, 173.66, 180.30, 180.62, 184.30, 185.74, 190.77, 195.74, 195.81, 199.27];
+    var r68_lo = 196.27;
+    var r68_hi = 205.63;
+    var expected = 201.29;
+    var price = 200.95;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-META">
+    <div class="card-header">
+      <span class="stock-name">META</span>
+      <span class="stock-price">$685.19</span>
+      <span class="stock-chg" style="color:green">+1.23%</span>
+      <span class="signal-badge" style="background:orange20;color:orange">🟡 52%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$686.10</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:orange">52%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:red">96</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">44%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-META" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$648 ~ $723</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$666 ~ $704</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$666 / $648</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$704 / $723</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$666.13 | MA20=$603.52</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-META');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [644.31, 646.84, 653.51, 654.30, 637.63, 613.18, 627.45, 622.66, 615.68, 606.70, 593.66, 604.06, 592.92, 594.89, 547.54, 525.72, 536.38, 572.13, 579.23, 574.46, 573.02, 575.05, 612.42, 628.39, 629.86, 634.53, 662.49, 671.58, 676.87, 685.19];
+    var highs  = [648.91, 647.20, 659.74, 658.56, 652.94, 628.63, 634.75, 636.55, 622.65, 613.00, 603.96, 608.64, 601.00, 603.67, 583.00, 543.60, 539.55, 573.69, 592.55, 578.50, 582.79, 575.23, 629.95, 637.50, 638.58, 635.00, 666.26, 678.50, 677.58, 687.79];
+    var lows   = [635.57, 626.24, 648.44, 647.81, 636.36, 609.03, 623.10, 621.70, 614.61, 602.26, 587.25, 599.01, 591.00, 593.40, 543.35, 520.26, 528.54, 546.77, 573.82, 559.70, 572.00, 564.76, 591.83, 623.00, 624.33, 624.40, 639.37, 664.22, 667.75, 675.13];
+    var r68_lo = 666.42;
+    var r68_hi = 703.96;
+    var expected = 686.1;
+    var price = 685.19;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-JPM">
+    <div class="card-header">
+      <span class="stock-name">JPM</span>
+      <span class="stock-price">$313.56</span>
+      <span class="stock-chg" style="color:green">+1.16%</span>
+      <span class="signal-badge" style="background:orange20;color:orange">🟡 52%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$313.80</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:orange">52%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:orange">82</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">25%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-JPM" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$304 ~ $323</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$309 ~ $318</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$309 / $304</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$318 / $323</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$310.85 | MA20=$298.36</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-JPM');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [288.01, 288.44, 287.26, 286.06, 281.45, 282.00, 284.70, 285.43, 286.27, 286.50, 285.10, 288.43, 290.91, 293.92, 290.17, 281.40, 282.33, 292.66, 293.88, 293.10, 295.45, 297.40, 307.97, 310.33, 309.87, 313.68, 311.12, 305.93, 309.95, 313.56];
+    var highs  = [288.51, 289.62, 291.26, 289.00, 282.43, 285.73, 287.80, 290.27, 287.94, 288.04, 289.23, 294.24, 293.98, 296.12, 293.49, 288.63, 285.79, 293.57, 297.20, 294.11, 296.83, 298.18, 311.26, 311.26, 310.35, 313.74, 314.32, 314.24, 309.95, 314.90];
+    var lows   = [282.27, 279.02, 285.72, 283.41, 277.68, 281.51, 283.16, 284.49, 283.67, 283.17, 283.82, 286.50, 283.92, 290.95, 289.25, 280.32, 280.89, 283.50, 291.42, 287.25, 293.20, 292.70, 305.33, 306.11, 306.72, 305.46, 308.87, 304.26, 305.20, 310.46];
+    var r68_lo = 308.68;
+    var r68_hi = 318.44;
+    var expected = 313.8;
+    var price = 313.56;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-GOOGL">
+    <div class="card-header">
+      <span class="stock-name">GOOGL</span>
+      <span class="stock-price">$338.61</span>
+      <span class="stock-chg" style="color:green">+0.77%</span>
+      <span class="signal-badge" style="background:orange20;color:orange">🟡 51%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$338.81</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:orange">51%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:red">94</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">28%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-GOOGL" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$326 ~ $351</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$333 ~ $345</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$333 / $326</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$345 / $351</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$333.19 | MA20=$305.92</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-GOOGL');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [298.31, 306.36, 307.04, 308.70, 303.55, 302.28, 305.56, 310.92, 307.69, 307.13, 301.00, 302.06, 290.44, 290.93, 280.92, 274.34, 273.50, 287.56, 297.39, 295.77, 299.99, 305.46, 317.32, 318.49, 317.24, 321.31, 332.91, 337.12, 336.02, 338.61];
+    var highs  = [300.32, 306.80, 309.51, 311.42, 308.94, 307.69, 306.49, 311.42, 312.47, 308.06, 306.00, 305.98, 299.92, 296.00, 287.95, 279.37, 277.09, 288.08, 300.52, 298.08, 300.62, 305.63, 322.08, 319.54, 321.83, 321.63, 333.29, 337.48, 339.88, 339.27];
+    var lows   = [294.97, 294.08, 305.57, 305.92, 301.03, 300.44, 303.02, 305.50, 306.93, 302.35, 298.27, 300.93, 290.33, 289.24, 278.50, 273.95, 272.11, 277.09, 290.41, 289.45, 295.18, 297.72, 315.02, 311.06, 316.32, 315.47, 323.75, 330.90, 334.52, 336.24];
+    var r68_lo = 332.53;
+    var r68_hi = 344.69;
+    var expected = 338.81;
+    var price = 338.61;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-PDD">
+    <div class="card-header">
+      <span class="stock-name">PDD</span>
+      <span class="stock-price">$104.83</span>
+      <span class="stock-chg" style="color:green">+1.08%</span>
+      <span class="signal-badge" style="background:orange20;color:orange">🟡 50%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$104.83</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:orange">50%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:green">62</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">30%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-PDD" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$101 ~ $109</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$103 ~ $107</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$103 / $101</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$107 / $109</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$102.68 | MA20=$100.76</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-PDD');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [101.97, 102.64, 104.86, 102.94, 101.62, 102.65, 103.84, 104.37, 100.72, 97.43, 96.19, 96.25, 98.09, 102.61, 100.62, 99.81, 98.42, 102.18, 101.78, 100.87, 100.91, 99.54, 103.75, 100.57, 100.17, 100.80, 102.10, 101.97, 103.71, 104.83];
+    var highs  = [102.73, 103.01, 106.57, 104.75, 103.89, 103.63, 105.54, 105.75, 104.54, 99.50, 99.24, 97.32, 99.54, 107.65, 105.11, 102.43, 100.53, 102.95, 104.10, 101.64, 102.75, 100.75, 104.80, 103.87, 103.86, 100.85, 103.18, 102.96, 106.92, 108.23];
+    var lows   = [101.39, 99.68, 103.42, 102.48, 101.39, 102.13, 103.46, 104.31, 100.13, 96.88, 96.05, 95.37, 96.05, 98.86, 99.81, 99.51, 97.86, 97.39, 101.52, 99.51, 100.67, 98.45, 102.51, 99.05, 99.91, 99.43, 101.33, 101.10, 103.08, 104.71];
+    var r68_lo = 102.87;
+    var r68_hi = 106.79;
+    var expected = 104.83;
+    var price = 104.83;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-V">
+    <div class="card-header">
+      <span class="stock-name">V</span>
+      <span class="stock-price">$317.44</span>
+      <span class="stock-chg" style="color:green">+0.74%</span>
+      <span class="signal-badge" style="background:orange20;color:orange">🟡 49%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$317.33</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:orange">49%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:orange">76</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">23%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-V" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$308 ~ $327</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$313 ~ $322</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$313 / $308</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$322 / $327</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$313.84 | MA20=$305.68</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-V');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [317.36, 315.97, 314.43, 308.96, 306.50, 307.14, 310.11, 308.46, 299.02, 299.71, 301.62, 304.44, 303.76, 304.91, 305.53, 295.52, 299.54, 302.24, 298.51, 300.80, 303.33, 302.55, 308.96, 308.29, 304.36, 309.39, 311.37, 315.91, 315.10, 317.44];
+    var highs  = [317.69, 316.40, 317.13, 315.08, 310.95, 310.35, 311.13, 312.69, 307.94, 302.47, 302.92, 307.85, 306.04, 308.49, 307.87, 304.59, 300.68, 303.34, 305.05, 302.47, 304.42, 304.98, 311.08, 309.58, 309.00, 309.75, 312.12, 316.73, 318.00, 319.44];
+    var lows   = [312.30, 310.15, 311.45, 308.39, 306.02, 306.42, 307.38, 307.38, 298.50, 297.03, 299.01, 302.85, 300.62, 302.17, 303.00, 294.32, 295.89, 296.59, 293.89, 295.85, 299.46, 301.12, 307.70, 303.59, 303.51, 302.34, 307.49, 311.52, 314.57, 315.18];
+    var r68_lo = 312.85;
+    var r68_hi = 322.03;
+    var expected = 317.33;
+    var price = 317.44;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-MSFT">
+    <div class="card-header">
+      <span class="stock-name">MSFT</span>
+      <span class="stock-price">$428.41</span>
+      <span class="stock-chg" style="color:green">+1.94%</span>
+      <span class="signal-badge" style="background:orange20;color:orange">🟡 49%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$428.16</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:orange">49%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:red">93</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">36%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-MSFT" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$409 ~ $448</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$419 ~ $438</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$419 / $409</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$438 / $448</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$407.47 | MA20=$380.21</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-MSFT');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [408.96, 409.41, 405.76, 404.88, 401.86, 395.55, 399.95, 399.41, 391.79, 389.02, 381.87, 383.00, 372.74, 371.04, 365.97, 356.77, 358.96, 370.17, 369.37, 373.46, 372.88, 372.29, 374.33, 373.07, 370.87, 384.37, 393.11, 411.22, 420.26, 428.41];
+    var highs  = [413.05, 410.21, 410.20, 409.01, 406.12, 404.80, 400.63, 404.40, 398.00, 392.49, 387.00, 387.21, 382.47, 377.06, 374.72, 362.45, 365.36, 372.90, 373.99, 373.64, 373.73, 372.45, 385.00, 373.50, 375.64, 384.54, 394.69, 414.37, 420.82, 431.58];
+    var lows   = [408.51, 403.50, 402.93, 401.59, 401.71, 394.25, 394.79, 397.75, 391.00, 387.06, 380.12, 381.68, 371.85, 369.63, 365.19, 356.51, 356.28, 363.07, 368.20, 364.15, 369.50, 366.56, 371.41, 367.05, 370.03, 371.02, 386.52, 396.73, 412.14, 422.95];
+    var r68_lo = 418.78;
+    var r68_hi = 438.04;
+    var expected = 428.16;
+    var price = 428.41;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-TSLA">
+    <div class="card-header">
+      <span class="stock-name">TSLA</span>
+      <span class="stock-price">$407.00</span>
+      <span class="stock-chg" style="color:green">+4.65%</span>
+      <span class="signal-badge" style="background:red20;color:red">🔴 48%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$406.44</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:red">48%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:green">66</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">40%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-TSLA" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$386 ~ $428</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$397 ~ $417</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$397 / $386</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$417 / $428</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$380.89 | MA20=$368.12</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-TSLA');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [396.73, 398.68, 399.24, 407.82, 395.01, 391.20, 395.56, 399.27, 392.78, 380.30, 367.96, 380.85, 383.03, 385.95, 372.11, 361.83, 355.28, 371.75, 381.26, 360.59, 352.82, 346.65, 343.25, 345.62, 348.95, 352.42, 364.20, 391.95, 388.90, 407.00];
+    var highs  = [402.35, 401.59, 406.59, 416.38, 406.50, 400.20, 403.73, 400.12, 403.07, 387.27, 379.89, 385.33, 387.48, 396.23, 384.44, 369.86, 367.29, 373.33, 383.14, 370.28, 367.72, 348.02, 364.50, 348.88, 350.36, 356.35, 367.63, 394.65, 394.06, 409.28];
+    var lows   = [394.21, 381.40, 398.19, 402.15, 394.65, 389.95, 394.42, 393.00, 392.31, 378.73, 364.46, 372.73, 376.31, 385.01, 371.87, 359.47, 352.14, 361.00, 374.08, 359.03, 346.64, 337.24, 339.67, 337.25, 342.74, 348.57, 354.77, 362.50, 381.80, 391.65];
+    var r68_lo = 396.72;
+    var r68_hi = 417.28;
+    var expected = 406.44;
+    var price = 407.0;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-TCEHY">
+    <div class="card-header">
+      <span class="stock-name">TCEHY</span>
+      <span class="stock-price">$67.25</span>
+      <span class="stock-chg" style="color:green">+2.05%</span>
+      <span class="signal-badge" style="background:red20;color:red">🔴 47%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$67.12</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:red">47%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:orange">70</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">38%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-TCEHY" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$64 ~ $70</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$66 ~ $69</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$66 / $64</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$69 / $70</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$64.95 | MA20=$63.79</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-TCEHY');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [65.44, 67.00, 73.96, 71.16, 69.17, 69.94, 71.87, 69.20, 66.00, 64.83, 63.50, 64.56, 65.09, 64.36, 62.74, 62.18, 61.03, 63.22, 63.50, 62.27, 62.40, 62.50, 64.76, 64.87, 63.98, 63.61, 63.73, 64.25, 65.90, 67.25];
+    var highs  = [65.97, 67.22, 74.47, 71.17, 70.00, 70.92, 72.19, 71.45, 68.49, 65.93, 64.53, 65.42, 65.29, 65.09, 63.45, 62.68, 61.71, 63.28, 64.78, 62.79, 62.88, 62.65, 65.40, 65.01, 64.74, 64.67, 64.20, 64.38, 66.30, 67.64];
+    var lows   = [64.90, 65.35, 70.48, 70.10, 69.11, 69.77, 71.15, 69.13, 65.55, 63.56, 63.39, 64.08, 64.60, 64.18, 62.58, 61.64, 60.92, 61.71, 63.48, 61.75, 62.16, 61.66, 64.44, 64.31, 63.93, 62.41, 63.22, 63.64, 65.50, 65.65];
+    var r68_lo = 65.64;
+    var r68_hi = 68.86;
+    var expected = 67.12;
+    var price = 67.25;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-NTES">
+    <div class="card-header">
+      <span class="stock-name">NTES</span>
+      <span class="stock-price">$118.12</span>
+      <span class="stock-chg" style="color:red">-0.22%</span>
+      <span class="signal-badge" style="background:red20;color:red">🔴 46%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$117.92</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:red">46%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:red">85</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">25%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-NTES" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$114 ~ $122</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$116 ~ $120</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$116 / $114</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$120 / $122</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$115.88 | MA20=$113.18</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-NTES');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [116.66, 116.53, 116.59, 114.12, 115.12, 116.35, 119.54, 118.87, 117.00, 116.33, 113.78, 113.38, 112.14, 113.06, 109.94, 109.26, 110.03, 111.94, 112.66, 112.81, 112.63, 112.50, 114.04, 113.25, 112.72, 113.41, 113.60, 115.87, 118.38, 118.12];
+    var highs  = [117.95, 116.56, 118.69, 116.49, 116.08, 117.83, 119.91, 119.94, 119.15, 117.32, 116.06, 115.56, 112.56, 113.38, 111.08, 110.27, 110.97, 111.98, 113.23, 113.44, 113.71, 112.59, 115.28, 113.55, 114.54, 113.44, 114.26, 116.17, 119.49, 119.20];
+    var lows   = [115.88, 115.04, 115.85, 113.69, 114.30, 115.74, 118.34, 118.69, 116.98, 114.65, 113.72, 113.23, 111.62, 111.58, 108.84, 109.09, 109.69, 108.67, 112.01, 110.85, 112.12, 111.08, 113.28, 111.77, 112.44, 111.96, 112.35, 113.61, 118.13, 117.71];
+    var r68_lo = 116.29;
+    var r68_hi = 119.96;
+    var expected = 117.92;
+    var price = 118.12;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+  <div class="card" id="card-BABA">
+    <div class="card-header">
+      <span class="stock-name">BABA</span>
+      <span class="stock-price">$142.14</span>
+      <span class="stock-chg" style="color:green">+2.56%</span>
+      <span class="signal-badge" style="background:red20;color:red">🔴 44%</span>
+    </div>
+    <div class="card-metrics">
+      <div class="metric"><span class="m-label">期望价</span><span class="m-val">$141.65</span></div>
+      <div class="metric"><span class="m-label">上涨概率</span><span class="m-val" style="color:red">44%</span></div>
+      <div class="metric"><span class="m-label">RSI</span><span class="m-val" style="color:orange">79</span></div>
+      <div class="metric"><span class="m-label">年化波幅</span><span class="m-val">36%</span></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-BABA" height="120"></canvas>
+    </div>
+    <div class="price-bands">
+      <div class="band">
+        <span class="b-label">95%区间</span>
+        <span class="b-val">$136 ~ $149</span>
+      </div>
+      <div class="band" style="background:#e8f5e9">
+        <span class="b-label">68%区间</span>
+        <span class="b-val" style="color:#2e7d32">$139 ~ $145</span>
+      </div>
+      <div class="band">
+        <span class="b-label">支撑位</span>
+        <span class="b-val">$139 / $136</span>
+      </div>
+      <div class="band">
+        <span class="b-label">压力位</span>
+        <span class="b-val">$145 / $149</span>
+      </div>
+    </div>
+    <div class="trend-info">📈 MA5=$134.67 | MA20=$127.04</div>
+  </div>
+
+  <script>
+  (function() {
+    var ctx = document.getElementById('chart-BABA');
+    var labels = ["2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+    var closes = [130.79, 132.64, 136.85, 136.29, 134.20, 135.21, 136.71, 136.57, 134.43, 124.90, 122.41, 126.06, 125.48, 129.87, 125.41, 122.69, 121.98, 125.46, 123.73, 122.05, 122.31, 119.72, 125.32, 127.68, 127.33, 128.01, 131.35, 133.28, 138.59, 142.14];
+    var highs  = [132.43, 132.91, 139.22, 136.74, 136.00, 137.20, 138.80, 138.22, 139.16, 126.92, 126.48, 127.27, 125.75, 130.65, 127.05, 124.44, 123.78, 125.78, 126.39, 122.85, 123.65, 121.98, 129.34, 127.78, 129.76, 128.09, 132.88, 133.60, 140.90, 143.78];
+    var lows   = [128.80, 128.55, 134.56, 134.82, 133.45, 134.70, 136.50, 135.97, 134.37, 121.16, 122.09, 123.10, 123.92, 128.34, 124.59, 122.23, 121.55, 121.38, 123.12, 120.14, 121.70, 117.93, 124.86, 123.96, 127.05, 125.55, 128.47, 131.37, 135.74, 139.91];
+    var r68_lo = 138.95;
+    var r68_hi = 145.33;
+    var expected = 141.65;
+    var price = 142.14;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '收盘价',
+            data: closes,
+            borderColor: '#2196f3',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0.3,
+          },
+          {
+            label: '68%区间上轨',
+            data: Array(closes.length).fill(r68_hi),
+            borderColor: 'rgba(76,175,80,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '68%区间下轨',
+            data: Array(closes.length).fill(r68_lo),
+            borderColor: 'rgba(244,67,54,0.4)',
+            borderWidth: 1.5,
+            borderDash: [4,4],
+            fill: false,
+            pointRadius: 0,
+          },
+          {
+            label: '期望价',
+            data: Array(closes.length).fill(expected),
+            borderColor: 'rgba(255,152,0,0.7)',
+            borderWidth: 2,
+            borderDash: [6,3],
+            fill: false,
+            pointRadius: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: {size:9} } },
+          y: { position: 'right', ticks: { font: {size:10} } },
+        }
+      }
+    });
+  })();
+  </script>
+
+</div>
+
+<div class="footer">
+  ⚠️ 仅供参考 | 基于历史波动率统计 | 不代表实际走势 | 数据来源: Yahoo Finance
+</div>
+
+<script>
+new Chart(document.getElementById('barChart'), {
+  type: 'bar',
+  data: {
+    labels: ["AAPL", "JD", "AMZN", "NVDA", "META", "JPM", "GOOGL", "PDD", "V", "MSFT", "TSLA", "TCEHY", "NTES", "BABA"],
+    datasets: [
+      {
+        label: '上涨概率 %',
+        data: [54.0, 53.3, 53.0, 52.9, 51.9, 51.9, 51.3, 50.0, 49.1, 49.0, 47.9, 46.9, 45.6, 43.9],
+        backgroundColor: ['rgba(76,175,80,0.5397)', 'rgba(76,175,80,0.5334)', 'rgba(76,175,80,0.5297)', 'rgba(76,175,80,0.5288)', 'rgba(76,175,80,0.5194)', 'rgba(76,175,80,0.5193)', 'rgba(76,175,80,0.5128)', 'rgba(76,175,80,0.4996)', 'rgba(76,175,80,0.4909)', 'rgba(76,175,80,0.4897)', 'rgba(76,175,80,0.4785)', 'rgba(76,175,80,0.4689)', 'rgba(76,175,80,0.4564)', 'rgba(76,175,80,0.4385)'],
+        borderColor: '#4caf50',
+        borderWidth: 1,
+        yAxisID: 'y',
+      },
+      {
+        label: 'RSI',
+        data: [73.9, 80.9, 97.7, 92.7, 96.4, 82.1, 93.5, 62.2, 76.2, 93.4, 66.1, 70.5, 85.1, 79.0],
+        type: 'line',
+        borderColor: '#ff9800',
+        borderWidth: 2,
+        pointRadius: 4,
+        fill: false,
+        yAxisID: 'y1',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: { position: 'left', title: { display: true, text: '上涨概率 %' }, min: 0, max: 100, ticks: { font: {size:10} } },
+      y1: { position: 'right', title: { display: true, text: 'RSI' }, min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { font: {size:10} } },
+      x: { ticks: { font: {size:10} } }
+    }
+  }
+});
+</script>
+</body>
+</html>

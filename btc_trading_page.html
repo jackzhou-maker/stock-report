@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>₿ BTC交易状态</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh;padding:20px}
+a{color:#60a5fa;text-decoration:none}
+
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.header h1{font-size:22px;color:#fff}
+.header h1 span{color:#f7931a}
+.header .nav a{background:#1f2937;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px}
+.header .nav a:hover{background:#374151}
+
+.price-banner{background:linear-gradient(135deg,#1a1500,#1a0f00);border:1px solid #f7931a;border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px}
+.btc-icon{font-size:40px}
+.price-info{flex:1}
+.price-main{font-size:36px;font-weight:700;color:#f7931a}
+.price-chg{font-size:14px;color:#4caf50;margin-top:2px}
+.price-meta{font-size:12px;color:#888;margin-top:4px}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+
+.card{background:#111827;border-radius:14px;padding:16px;border:1px solid #1f2937}
+.card-label{font-size:10px;color:#666;text-transform:uppercase;margin-bottom:6px}
+.card-val{font-size:22px;font-weight:700;color:#fff}
+.card-sub{font-size:11px;color:#888;margin-top:2px}
+
+.signals{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:600px){.signals{grid-template-columns:1fr}}
+.signal-box{background:#111827;border-radius:14px;padding:18px;border:1px solid #1f2937}
+.signal-title{font-size:12px;color:#888;margin-bottom:8px;text-transform:uppercase'}
+.signal-val{font-size:16px;font-weight:700;margin-bottom:4px}
+.signal-action{font-size:12px;color:#888}
+
+.trade-banner{background:#111827;border-radius:14px;padding:20px;border:2px solid #9e9e9e;margin-bottom:20px}
+.trade-title{font-size:12px;color:#888;margin-bottom:8px;text-transform:uppercase'}
+.trade-action{font-size:18px;font-weight:700;color:#9e9e9e;margin-bottom:6px}
+.trade-desc{font-size:13px;color:#aaa}
+
+.chart-section{background:#111827;border-radius:14px;padding:20px;border:1px solid #1f2937;margin-bottom:20px}
+.section-title{font-size:14px;color:#fff;margin-bottom:14px;font-weight:600}
+.chart-wrap{height:300px}
+
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:14px}
+.level-item{background:#0d1117;border-radius:8px;padding:12px;text-align:center}
+.level-label{font-size:10px;color:#666;margin-bottom:4px}
+.level-val{font-size:16px;font-weight:700;color:#fff}
+.level-note{font-size:10px;color:#888;margin-top:2px}
+
+.footer{text-align:center;color:#333;font-size:11px;margin-top:30px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>₿ <span>BTC</span> 交易状态</h1>
+  <div class="nav">
+    <a href="http://192.168.31.27:8899">← 返回首页</a>
+    <a href="http://192.168.31.27:8899/stock_forecast_chart.html">📊 股票预报</a>
+  </div>
+</div>
+
+<!-- 价格横幅 -->
+<div class="price-banner">
+  <div class="btc-icon">₿</div>
+  <div class="price-info">
+    <div class="price-main">$77,943.75</div>
+    <div class="price-chg">↑ ++3.71% (24h)</div>
+    <div class="price-meta">更新: 00:11:11 | 模拟盘</div>
+  </div>
+</div>
+
+<!-- 关键指标 -->
+<div class="metrics">
+  <div class="card">
+    <div class="card-label">MACD直方图</div>
+    <div class="card-val" style="color:#4caf50">🟢 541</div>
+    <div class="card-sub">MACD多头，均线向上</div>
+  </div>
+  <div class="card">
+    <div class="card-label">RSI (14)</div>
+    <div class="card-val" style="color:#f44336">80</div>
+    <div class="card-sub">RSI 超买</div>
+  </div>
+  <div class="card">
+    <div class="card-label">均线状态</div>
+    <div class="card-val" style="color:#4caf50">MA5</div>
+    <div class="card-sub">上涨趋势</div>
+  </div>
+  <div class="card">
+    <div class="card-label">年化波幅</div>
+    <div class="card-val">61%</div>
+    <div class="card-sub">日均±3.2%</div>
+  </div>
+  <div class="card">
+    <div class="card-label">52周位置</div>
+    <div class="card-val">50%</div>
+    <div class="card-sub">$nan ~ $nan</div>
+  </div>
+  <div class="card">
+    <div class="card-label">布林带</div>
+    <div class="card-val">$70,805</div>
+    <div class="card-sub">±6916 (20日)</div>
+  </div>
+</div>
+
+<!-- 交易信号 -->
+<div class="trade-banner">
+  <div class="trade-title">交易信号</div>
+  <div class="trade-action">📭 观望 — 暂无交易信号</div>
+  <div class="trade-desc">等待MACD金叉或价格回调至支撑位</div>
+</div>
+
+<!-- 买卖信号详情 -->
+<div class="signals">
+  <div class="signal-box">
+    <div class="signal-title">MACD</div>
+    <div class="signal-val" style="color:#4caf50">🟢 中性</div>
+    <div class="signal-action">MACD线: 2649 | 信号线: 2107 | 直方图: 541</div>
+  </div>
+  <div class="signal-box">
+    <div class="signal-title">均线系统</div>
+    <div class="signal-val" style="color:#4caf50">MA5 > MA20</div>
+    <div class="signal-action">MA5: $75,313 | MA20: $70,805 | MA200: $69,510</div>
+  </div>
+</div>
+
+<!-- K线图 -->
+<div class="chart-section">
+  <div class="section-title">📈 BTC/USDT 近期走势 (30日)</div>
+  <div class="chart-wrap">
+    <canvas id="btcChart"></canvas>
+  </div>
+  <div class="levels">
+    <div class="level-item" style="border:1px solid #f44336">
+      <div class="level-label">压力位1</div>
+      <div class="level-val" style="color:#f44336">$80,444</div>
+    </div>
+    <div class="level-item" style="border:1px solid #4caf50">
+      <div class="level-label">支撑位1</div>
+      <div class="level-val" style="color:#4caf50">$75,444</div>
+    </div>
+    <div class="level-item">
+      <div class="level-label">20日均线</div>
+      <div class="level-val">$70,805</div>
+    </div>
+    <div class="level-item">
+      <div class="level-label">布林上轨</div>
+      <div class="level-val">$77,721</div>
+    </div>
+  </div>
+</div>
+
+<!-- 策略参数 -->
+<div class="chart-section">
+  <div class="section-title">📋 策略参数 (MACD 6/18/5)</div>
+  <div class="levels">
+    <div class="level-item" style="border:1px solid #4caf50">
+      <div class="level-label">买入条件</div>
+      <div class="level-val" style="color:#4caf50">MACD金叉</div>
+      <div class="level-note">快线从下穿上</div>
+    </div>
+    <div class="level-item" style="border:1px solid #ff9800">
+      <div class="level-label">止盈</div>
+      <div class="level-val" style="color:#ff9800">+20%</div>
+      <div class="level-note">涨20%自动卖</div>
+    </div>
+    <div class="level-item" style="border:1px solid #f44336">
+      <div class="level-label">止损</div>
+      <div class="level-val" style="color:#f44336">-10%</div>
+      <div class="level-note">跌10%强制卖</div>
+    </div>
+    <div class="level-item" style="border:1px solid #9c27b0">
+      <div class="level-label">追踪止损</div>
+      <div class="level-val" style="color:#9c27b0">-5%</div>
+      <div class="level-note">从最高点回落5%卖</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">OKX模拟盘 | MACD(6/18/5) | 仅供参考，不构成投资建议</div>
+
+<script>
+// K线+均线+MACD图表
+var ctx = document.getElementById('btcChart');
+var labels = ["2026-03-19", "2026-03-20", "2026-03-21", "2026-03-22", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-29", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11", "2026-04-12", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17"];
+var closes = [69912.79, 70522.59, 68711.52, 67845.21, 70914.86, 70517.86, 71309.88, 68791.62, 66338.38, 66319.70, 65954.92, 66691.45, 68233.31, 68078.55, 66888.57, 66931.10, 67290.52, 68981.90, 68859.83, 71940.70, 71123.36, 71767.83, 72979.05, 73054.27, 70753.41, 74484.64, 74181.61, 74805.08, 75152.13, 77943.75];
+var highs  = [71598.84, 71346.80, 71051.27, 69561.77, 71782.26, 71371.30, 71985.74, 71410.39, 69117.53, 67232.86, 67052.95, 68087.29, 68495.27, 69230.36, 68633.15, 67296.23, 67515.02, 69087.66, 70305.42, 72732.43, 72825.19, 73107.27, 73440.12, 73784.23, 73154.03, 74896.31, 76061.76, 75409.27, 75506.57, 77986.94];
+var lows   = [68805.52, 69398.88, 68602.91, 67372.88, 67458.84, 68920.70, 70383.59, 68118.35, 65532.57, 65906.74, 64971.71, 65759.80, 65950.44, 67555.36, 65725.26, 66281.54, 66769.64, 66610.63, 68347.08, 67740.51, 70707.47, 70486.36, 71434.83, 72556.34, 70540.57, 70588.52, 73877.20, 73549.20, 73346.27, 74598.08];
+var ma20_vals = [];
+var ma5_vals = [];
+// 简单计算ma5/ma20 (Python侧已算好，这里从closes推)
+var sum5=0,sum20=0;
+for(var i=0;i<closes.length;i++){
+  sum5+=closes[i];sum20+=closes[i];
+  if(i>=4){sum5-=closes[i-5];ma5_vals.push(sum5/5);}else{ma5_vals.push(sum5/(i+1));}
+  if(i>=19){sum20-=closes[i-20];ma20_vals.push(sum20/20);}else{ma20_vals.push(sum20/(i+1));}
+}
+
+// 填充前面的为null
+while(ma5_vals.length<closes.length)ma5_vals.unshift(null);
+while(ma20_vals.length<closes.length)ma20_vals.unshift(null);
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: '收盘价',
+        data: closes,
+        borderColor: '#f7931a',
+        backgroundColor: 'rgba(247,147,26,0.1)',
+        borderWidth: 2,
+        fill: true,
+        pointRadius: 0,
+        tension: 0.3,
+      },
+      {
+        label: 'MA5',
+        data: ma5_vals,
+        borderColor: '#4caf50',
+        borderWidth: 1.5,
+        fill: false,
+        pointRadius: 0,
+        tension: 0.3,
+      },
+      {
+        label: 'MA20',
+        data: ma20_vals,
+        borderColor: '#2196f3',
+        borderWidth: 1.5,
+        fill: false,
+        pointRadius: 0,
+        tension: 0.3,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { mode:'index', intersect:false } },
+    scales: {
+      x: { ticks: { maxTicksLimit: 10, font: {size:10} }, grid: { color:'#1a1a2e' } },
+      y: { position:'right', grid: { color:'#1a1a2e' }, ticks: { font: {size:10} } }
+    }
+  }
+});
+</script>
+</body>
+</html>
